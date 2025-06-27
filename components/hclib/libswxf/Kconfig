@@ -1,0 +1,3 @@
+config BR2_PACKAGE_LIBSWXF
+	bool "lib sw xform"
+	default n

@@ -1,0 +1,17 @@
+if BR2_PACKAGE_APPS_HCUSBCAST
+
+config CONFIG_APPS_IUM
+	bool "ium"
+	default y
+	select CONFIG_NET
+	
+config CONFIG_APPS_AUM
+	bool "aum"
+	default y
+
+config CONFIG_APPS_HCUSBCAST_HID
+	bool "back control hid"
+	select BR2_PACKAGE_PREBUILTS_LIBHIDALGO
+	default n
+
+endif

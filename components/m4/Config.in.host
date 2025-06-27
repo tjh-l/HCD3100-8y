@@ -1,0 +1,2 @@
+config BR2_PACKAGE_HOST_M4
+	bool "host m4"

@@ -1,0 +1,92 @@
+menuconfig CONFIG_RC_CORE
+	bool "rc core"
+	default y
+
+if CONFIG_RC_CORE
+
+source "rc/keymaps/Kconfig"
+
+menuconfig CONFIG_RC_DECODERS
+	bool "Remote controller decoders"
+	default y
+
+if CONFIG_RC_DECODERS
+
+config CONFIG_IR_NEC_DECODER
+	bool "nec decoder"
+	default y
+
+endif
+
+menuconfig CONFIG_RC_DEVICES
+	bool "Remote Controller devices"
+	depends on CONFIG_RC_CORE
+	default y
+
+if CONFIG_RC_DEVICES
+
+config CONFIG_RC_HC
+	bool "HC remote controls"
+	depends on CONFIG_RC_CORE
+	default y
+
+endif
+
+endif
+
+menuconfig CONFIG_TP
+	bool "tp menu"
+	default n
+
+if CONFIG_TP
+	source "tp/Kconfig"
+endif
+
+menuconfig CONFIG_MISC
+	bool "misc"
+	default n
+
+if CONFIG_MISC
+	source "misc/Kconfig"
+endif
+
+menuconfig CONFIG_SAR_ADC
+	bool "saradc menu"
+	default n
+
+if CONFIG_SAR_ADC
+	source "../saradc/Kconfig"
+endif
+
+config CONFIG_DRV_GPIO_KEY_GROUP
+        bool "gpio key"
+        depends on CONFIG_DRV_GPIO
+        default n
+
+config  CONFIG_DRV_GPIO_KEY
+	bool "hc key gpio driver"
+        depends on CONFIG_DRV_GPIO
+	default n
+
+menuconfig CONFIG_ROTARY_KEY
+	bool "rotary key"
+	default n
+
+if CONFIG_ROTARY_KEY
+	source "rotary_key/Kconfig"
+endif
+
+config CONFIG_INPUT_JOYDEV
+	tristate "Joystick interface"
+	help
+	  Say Y here if you want your joystick or gamepad to be
+	  accessible as char device 13:0+ - /dev/input/jsX device.
+
+	  If unsure, say Y.
+
+	  More information is available: <file:Documentation/input/joystick.txt>
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called joydev.
+
+source "joystick/Kconfig"

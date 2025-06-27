@@ -1,0 +1,576 @@
+diff --git a/Makefile.am b/Makefile.am
+index 1eaa560..8ba1782 100644
+--- a/Makefile.am
++++ b/Makefile.am
+@@ -1,15 +1,15 @@
+ 
+ AM_CFLAGS = @BUILD_CFLAGS@ 
+ lib_LTLIBRARIES = libsqlite3.la
+-libsqlite3_la_SOURCES = sqlite3.c
++libsqlite3_la_SOURCES =  sqlite3.c hc_port.c
+ libsqlite3_la_LDFLAGS = -no-undefined -version-info 8:6:8
+ 
+-bin_PROGRAMS = sqlite3
+-sqlite3_SOURCES = shell.c sqlite3.h
+-EXTRA_sqlite3_SOURCES = sqlite3.c
+-sqlite3_LDADD = @EXTRA_SHELL_OBJ@ @READLINE_LIBS@
+-sqlite3_DEPENDENCIES = @EXTRA_SHELL_OBJ@
+-sqlite3_CFLAGS = $(AM_CFLAGS) -DSQLITE_ENABLE_EXPLAIN_COMMENTS -DSQLITE_DQS=0 -DSQLITE_ENABLE_DBPAGE_VTAB -DSQLITE_ENABLE_STMTVTAB -DSQLITE_ENABLE_DBSTAT_VTAB $(SHELL_CFLAGS)
++#bin_PROGRAMS = sqlite3
++#sqlite3_SOURCES = shell.c sqlite3.h
++#EXTRA_sqlite3_SOURCES = sqlite3.c
++#sqlite3_LDADD = @EXTRA_SHELL_OBJ@ @READLINE_LIBS@
++#sqlite3_DEPENDENCIES = @EXTRA_SHELL_OBJ@
++#sqlite3_CFLAGS = $(AM_CFLAGS) -DSQLITE_ENABLE_EXPLAIN_COMMENTS -DSQLITE_DQS=0 -DSQLITE_ENABLE_DBPAGE_VTAB -DSQLITE_ENABLE_STMTVTAB -DSQLITE_ENABLE_DBSTAT_VTAB $(SHELL_CFLAGS)
+ 
+ include_HEADERS = sqlite3.h sqlite3ext.h
+ 
+diff --git a/hc_port.c b/hc_port.c
+new file mode 100644
+index 0000000..a76120c
+--- /dev/null
++++ b/hc_port.c
+@@ -0,0 +1,509 @@
++#include <stdio.h>
++#include <errno.h>
++#include <freertos/FreeRTOS.h>
++#include <freertos/semphr.h>
++#include <freertos/task.h>
++#include <limits.h>
++#include <stddef.h>
++#include <stdint.h>
++#include <string.h>
++#include <sys/file.h>
++#include <sys/stat.h>
++#include <sys/time.h>
++#include <unistd.h>
++#include <stdlib.h>
++#include <kernel/module.h>
++#include "sqlite3.h"
++
++#define ENABLE_SQLITE3_CACHE 1
++#ifndef SQLITE_HC_VFS_BUFFERSZ
++# define SQLITE_HC_VFS_BUFFERSZ 8192
++#endif
++
++typedef struct {
++	sqlite3_file base;
++	FILE *f;
++	sqlite3_int64 size;
++	//Buffer cahced data
++	char *aBuffer;
++	//used buffer size
++	int nBuffer;
++	// current database file read/write offset
++	sqlite3_int64 iBufferOfst;
++} hc_file_t;
++
++/*
++ * zBuf: input buffer
++ * iOfst: writing start
++ * iAmt: buffer size
++ * */
++static int hc_direct_write(hc_file_t *p, const void *zBuf, int iAmt, sqlite_int64 iOfst)
++{
++	if (fseek(p->f, iOfst, SEEK_SET) < 0) {
++		return SQLITE_IOERR;
++	}
++
++	size_t n = fwrite(zBuf, 1, iAmt, p->f);
++	if ((int)n != iAmt) {
++		return SQLITE_IOERR;
++	}
++
++	if (iOfst + iAmt > p->size) {
++		p->size = iOfst + iAmt;
++	}
++
++	return SQLITE_OK;
++}
++
++static int hc_flush_buffer(hc_file_t *p)
++{
++	int rc = SQLITE_OK;
++	if (p->aBuffer) {
++		rc = hc_direct_write(p, p->aBuffer, p->nBuffer, p->iBufferOfst);
++		p->nBuffer = 0;
++	}
++	return rc;
++}
++
++static int hc_close(sqlite3_file *pFile)
++{
++	int rc;
++	hc_file_t *p = (hc_file_t *)pFile;
++	rc = hc_flush_buffer(p);
++	fclose(p->f);
++	return rc;
++}
++
++static int hc_read(sqlite3_file *pFile, void *zBuf, int iAmt, sqlite_int64 iOfst)
++{
++	hc_file_t *p = (hc_file_t *)pFile;
++
++	int rc = hc_flush_buffer(p);
++	if (rc != SQLITE_OK) {
++		return rc;
++	}
++
++	if (fseek(p->f, iOfst, SEEK_SET) < 0) {
++		return SQLITE_IOERR_READ;
++	}
++
++	size_t n = fread(zBuf, 1, iAmt, p->f);
++	if ((int)n == iAmt) {
++		return SQLITE_OK;
++	} else if (ferror(p->f)) {
++		clearerr(p->f);
++		return SQLITE_IOERR_READ;
++	}
++
++	return SQLITE_IOERR_SHORT_READ;
++}
++
++static int hc_write(sqlite3_file *file, const void *zBuf, int iAmt, sqlite3_int64 iOfst)
++{
++	hc_file_t *p = (hc_file_t *)file;
++
++	if (!p->aBuffer) {
++		return hc_direct_write(p, zBuf, iAmt, iOfst);
++	}
++
++	char *z = (char *)zBuf;
++	int n = iAmt;
++	sqlite3_int64 i = iOfst;
++
++	while (n > 0) {
++		if (p->nBuffer == SQLITE_HC_VFS_BUFFERSZ || p->iBufferOfst + p->nBuffer != i) {
++			//at first, flush all cached data to files.
++			int rc = hc_flush_buffer(p);
++			if (rc != SQLITE_OK) {
++				return rc;
++			}
++		}
++		assert(p->nBuffer == 0 || p->iBufferOfst + p->nBuffer == i);
++		p->iBufferOfst = i - p->nBuffer;
++
++		int nCopy = SQLITE_HC_VFS_BUFFERSZ - p->nBuffer;
++		if (nCopy > n) {
++			nCopy = n;
++		}
++		memcpy (&p->aBuffer[p->nBuffer], z, nCopy);
++		p->nBuffer += nCopy;
++
++		n -= nCopy;
++		i += nCopy;
++		z += nCopy;
++	}
++
++	return SQLITE_OK;
++}
++
++
++static int hc_truncate(sqlite3_file *pFile, sqlite_int64 size)
++{
++
++	/* hc_file_t *p = (hc_file_t *)file; */
++	/* fclose(p->f); */
++
++	return SQLITE_OK;
++}
++
++static int hc_sync(sqlite3_file *pFile, int flags)
++{
++	hc_file_t *p = (hc_file_t *)pFile;
++
++	int rc = hc_flush_buffer(p);
++	if (rc != SQLITE_OK) {
++		return rc;
++	}
++
++	rc = fflush(p->f);
++	return (rc == 0 ? SQLITE_OK : SQLITE_IOERR_FSYNC);
++}
++
++static int hc_file_size(sqlite3_file *pFile, sqlite_int64 *pSize)
++{
++	hc_file_t *p = (hc_file_t *) pFile;
++
++	int rc = hc_flush_buffer(p);
++	if (rc != SQLITE_OK) {
++		return rc;
++	}
++
++	*pSize = p->size;
++	return SQLITE_OK;
++}
++
++static int hc_lock(sqlite3_file *pFile, int eLock)
++{
++	return SQLITE_OK;
++}
++
++static int hc_unlock(sqlite3_file *pFile, int eLock)
++{
++	return SQLITE_OK;
++}
++
++static int hc_check_reserved_lock(sqlite3_file *pFile, int *pResOut)
++{
++	*pResOut = 0;
++	return SQLITE_OK;
++}
++
++static int hc_file_control(sqlite3_file *pFile, int op, void *pArg)
++{
++	return SQLITE_OK;
++}
++
++static int hc_sector_size(sqlite3_file *pFile)
++{
++	return 512; /* FIXME: detect this */
++}
++
++static int hc_device_characteristics(sqlite3_file *pFile)
++{
++	return 0;
++}
++
++static const sqlite3_io_methods hc_io = {
++	.iVersion = 1,
++	.xClose = hc_close,
++	.xWrite = hc_write,
++	.xRead = hc_read,
++	.xTruncate = hc_truncate,
++	.xSync = hc_sync,
++	.xFileSize = hc_file_size,
++	.xLock = hc_lock,
++	.xUnlock = hc_unlock,
++	.xCheckReservedLock = hc_check_reserved_lock,
++	.xFileControl = hc_file_control,
++	.xSectorSize = hc_sector_size,
++	.xDeviceCharacteristics = hc_device_characteristics,
++};
++
++static int hc_open(sqlite3_vfs *pVfs, const char *zName, sqlite3_file *pFile, int flags, int *pOutFlags)
++{
++
++	hc_file_t *p = (hc_file_t *)pFile;
++	char *aBuf = NULL;
++	char *mode = "r";
++
++	if (zName == NULL) {
++		return SQLITE_IOERR;
++	}
++
++	if (ENABLE_SQLITE3_CACHE && flags & SQLITE_OPEN_MAIN_JOURNAL) {
++		aBuf = (char *)sqlite3_malloc(SQLITE_HC_VFS_BUFFERSZ);
++		if (!aBuf) {
++			return SQLITE_NOMEM;
++		}
++	}
++
++	bool exist = true;
++	struct stat st;
++	if (stat(zName, &st) < 0) {
++		exist = false;
++	}
++
++	if (!exist && !(flags & SQLITE_OPEN_CREATE)) {
++		sqlite3_free(aBuf);
++		return SQLITE_CANTOPEN;
++	}
++
++	if (flags & SQLITE_OPEN_READWRITE) {
++		mode = exist ? "r+" : "w+";
++	}
++
++	memset(p, 0, sizeof(hc_file_t));
++	p->f = fopen(zName, mode);
++	if (p->f == NULL) {
++		sqlite3_free(aBuf);
++		return SQLITE_CANTOPEN;
++	}
++	p->aBuffer = aBuf;
++	p->size = exist ? st.st_size : 0;
++
++	if (pOutFlags) {
++		*pOutFlags = flags;
++	}
++	p->base.pMethods = &hc_io;
++	return SQLITE_OK;
++}
++
++static int hc_delete(sqlite3_vfs *pVfs, const char *zPath, int dirSync)
++{
++	int rc;
++
++	rc = remove(zPath);
++	if (rc == 0 || (rc != 0 && errno == ENOENT)) {
++		return SQLITE_OK;
++	}
++	return SQLITE_IOERR_DELETE;
++}
++
++static int hc_access(sqlite3_vfs *pVfs, const char *zPath, int flags, int *pResOut)
++{
++	struct stat st;
++	*pResOut = (stat(zPath, &st) >= 0);
++	return SQLITE_OK;
++}
++
++static int hc_full_pathname(sqlite3_vfs *pVfs, const char *zPath, int nPathOut, char *zPathOut)
++{
++	if (zPath[0] != '/') {
++		sqlite3_snprintf(nPathOut, zPathOut, "/%s", zPath);
++	} else {
++		strncpy(zPathOut, zPath, nPathOut);
++	}
++	zPathOut[nPathOut - 1] = '\0';
++
++	return SQLITE_OK;
++}
++
++static void *hc_dl_open(sqlite3_vfs *pVfs, const char *zPath)
++{
++	return NULL;
++}
++
++static void hc_dl_error(sqlite3_vfs *pVfs, int nByte, char *zErrMsg)
++{
++	sqlite3_snprintf(nByte, zErrMsg, "Dynamic lodable extensions are not supported");
++	zErrMsg[nByte - 1] = '\0';
++}
++
++static void (*hc_dl_sym(sqlite3_vfs *pVfs, void *pHandle, const char *zSym))(void)
++{
++	return NULL;
++}
++
++static void hc_dl_close(sqlite3_vfs *pVfs, void *pHandle)
++{
++	return;
++}
++
++static int hc_randomness(sqlite3_vfs *pVfs, int nByte, char *zByte)
++{
++	int dword_count = (nByte + 3) / sizeof(uint32_t);
++	/* uint32_t buf[dword_count]; */
++	uint32_t *buf = (uint32_t *)zByte;
++    int i;
++
++	for (i = 0; i < dword_count; i++) {
++		buf[i] = random();
++	}
++
++	/* memcpy(zByte, buf, nByte); */
++	return nByte;
++}
++
++static int hc_sleep(sqlite3_vfs *pVfs, int nMicro)
++{
++	TickType_t start = xTaskGetTickCount();
++	vTaskDelay(nMicro / 1000 / portTICK_PERIOD_MS);
++	return ((xTaskGetTickCount() - start) * portTICK_PERIOD_MS) * 1000;
++}
++
++static int hc_current_time(sqlite3_vfs *pVfs, double *pTime)
++{
++	time_t t = time(0);
++	*pTime = t / 86400.0 + 2440587.5;
++	return SQLITE_OK;
++}
++
++static int hc_get_last_error(sqlite3_vfs *pVfs, int nErrorOut, char *zErrorOut)
++{
++	return errno;
++}
++
++static int hc_current_time_int64(sqlite3_vfs *pVfs, sqlite3_int64 *piNow)
++{
++	static const sqlite3_int64 unixEpoch = 24405875*(sqlite3_int64)8640000;
++	struct timeval sNow;
++
++	(void)gettimeofday(&sNow, 0);
++	*piNow = unixEpoch + 1000*(sqlite3_int64)sNow.tv_sec + sNow.tv_usec/1000;
++	return SQLITE_OK;
++}
++
++static sqlite3_vfs hc_vfs = {
++	.iVersion = 2,
++	.szOsFile = sizeof(hc_file_t),
++	.mxPathname = PATH_MAX + 1,
++	.pNext = NULL,
++	.zName = "xsail",
++	.pAppData = NULL,
++	.xOpen = hc_open,
++	.xDelete = hc_delete,
++	.xAccess = hc_access,
++	.xFullPathname = hc_full_pathname,
++	.xDlOpen = hc_dl_open,
++	.xDlError = hc_dl_error,
++	.xDlSym = hc_dl_sym,
++	.xDlClose = hc_dl_close,
++	.xRandomness = hc_randomness,
++	.xSleep = hc_sleep,
++	.xCurrentTime = hc_current_time,
++	.xGetLastError = hc_get_last_error,
++	.xCurrentTimeInt64 = hc_current_time_int64,
++};
++
++int sqlite3_os_init(void)
++{
++	return sqlite3_vfs_register(&hc_vfs, 1);
++}
++
++int sqlite3_os_end(void)
++{
++	return sqlite3_vfs_unregister(&hc_vfs);
++}
++
++struct sqlite3_mutex {
++	xSemaphoreHandle mutex;
++	int id;
++};
++
++static int freertosMutexInit(void)
++{
++	return SQLITE_OK;
++}
++
++static int freertosMutexEnd(void)
++{
++	return SQLITE_OK;
++}
++
++static sqlite3_mutex *freertosMutexAlloc(int id)
++{
++	sqlite3_mutex *p = calloc(1, sizeof(*p));
++	if (!p) {
++		return NULL;
++	}
++	p->id = id;
++
++	switch (id) {
++	case SQLITE_MUTEX_RECURSIVE:
++		p->mutex = xSemaphoreCreateRecursiveMutex();
++		break;
++
++	case SQLITE_MUTEX_FAST:
++	default:
++		p->mutex = xSemaphoreCreateMutex();
++		break;
++	}
++
++	return p;
++}
++
++static void freertosMutexFree(sqlite3_mutex *p)
++{
++	vSemaphoreDelete(p->mutex);
++	free(p);
++	return;
++}
++
++static void freertosMutexEnter(sqlite3_mutex *p)
++{
++	if (p->id == SQLITE_MUTEX_RECURSIVE) {
++		xSemaphoreTakeRecursive(p->mutex, portMAX_DELAY);
++	} else {
++		xSemaphoreTake(p->mutex, portMAX_DELAY);
++	}
++}
++
++static int freertosMutexTry(sqlite3_mutex *p)
++{
++	int rc;
++	if (p->id == SQLITE_MUTEX_RECURSIVE) {
++		rc = xSemaphoreTakeRecursive(p->mutex, 0);
++	} else {
++		rc = xSemaphoreTake(p->mutex, 0);
++	}
++	return rc == pdTRUE ? SQLITE_OK : SQLITE_BUSY;
++}
++
++static void freertosMutexLeave(sqlite3_mutex *p)
++{
++	if (p->id == SQLITE_MUTEX_RECURSIVE) {
++		xSemaphoreGiveRecursive(p->mutex);
++	} else {
++		xSemaphoreGive(p->mutex);
++	}
++}
++
++static int freertosMutexHeld(sqlite3_mutex *p)
++{
++	return xSemaphoreGetMutexHolder(p->mutex) != NULL;
++}
++
++
++static int freertosMutexNotHeld(sqlite3_mutex *p)
++{
++	return xSemaphoreGetMutexHolder(p->mutex) == NULL;
++}
++
++sqlite3_mutex_methods const *sqlite3FreertosMutex(void)
++{
++	static const sqlite3_mutex_methods sMutex = {
++		freertosMutexInit,
++		freertosMutexEnd,
++		freertosMutexAlloc,
++		freertosMutexFree,
++		freertosMutexEnter,
++		freertosMutexTry,
++		freertosMutexLeave,
++		freertosMutexHeld,
++		freertosMutexNotHeld,
++	};
++
++	return &sMutex;
++}
++
++static int sqlite3_init(void)
++{
++    return sqlite3_os_init();
++}
++
++static int sqlite3_exit(void)
++{
++    return sqlite3_os_end();
++}
++
++module_driver(sqlite3, sqlite3_init, sqlite3_exit, 1)
+diff --git a/sqlite3.c b/sqlite3.c
+index 099c548..579f0a0 100644
+--- a/sqlite3.c
++++ b/sqlite3.c
+@@ -168,9 +168,9 @@
+ #else
+ /* This is not VxWorks. */
+ #define OS_VXWORKS 0
+-#define HAVE_FCHOWN 1
+-#define HAVE_READLINK 1
+-#define HAVE_LSTAT 1
++//#define HAVE_FCHOWN 0
++//#define HAVE_READLINK 0
++/*#define HAVE_LSTAT 1*/
+ #endif /* defined(_WRS_KERNEL) */
+ 
+ /************** End of vxworks.h *********************************************/
+@@ -46587,7 +46587,7 @@ static int proxyClose(sqlite3_file *id) {
+ **
+ ******************* End of the proxy lock implementation **********************
+ ******************************************************************************/
+-
++#if 0
+ /*
+ ** Initialize the operating system interface.
+ **
+@@ -46735,6 +46735,7 @@ SQLITE_API int sqlite3_os_end(void){
+   unixBigLock = 0;
+   return SQLITE_OK;
+ }
++#endif
+ 
+ #endif /* SQLITE_OS_UNIX */
+ 

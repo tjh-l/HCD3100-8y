@@ -1,0 +1,3 @@
+config CONFIG_RTC_AT8563
+	bool "rtc at8563"
+	default n

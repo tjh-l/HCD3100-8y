@@ -1,0 +1,2 @@
+obj-$(CONFIG_HC_SAL61955M) += sal61955m/
+obj-$(CONFIG_HC_ES1106S) += es1106s/

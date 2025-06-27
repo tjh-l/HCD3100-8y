@@ -1,0 +1,40 @@
+if (BR2_PACKAGE_APPS_HCSCREEN)
+
+if (BR2_PACKAGE_PREBUILTS_TOE || BR2_PACKAGE_PREBUILTS_TOE2)
+
+config CONFIG_HOTSPOT
+	bool "Support net hotspot"
+	default n
+	select CONFIG_NET_HOTSPOT
+
+endif
+
+config CONFIG_HTTP_UPGRADE_URL
+	string "http upgrade url"
+	default "http://172.16.12.81:80"
+
+config CONFIG_APPS_AIRP2P
+	bool "Enable Airp2p"
+	default n
+	select BR2_PACKAGE_HCCAST_AIRP2P_SUPPORT
+	select BR2_PACKAGE_LIBUSB
+
+config CONFIG_APPS_WATCHDOG_SUPPORT
+	bool "Enable watchdog"
+	depends on CONFIG_DRV_WDT
+	default y
+
+config CONFIG_APPS_WATCHDOG_TIMEOUT
+	int "Default timeout (in millisecond) of watchdog timer"
+	depends on CONFIG_APPS_WATCHDOG_SUPPORT
+	range 1 120000
+	default 30000
+
+config CONFIG_APPS_UIBC_SUPPORT
+	bool "Support UIBC"
+	default n
+	select BR2_PACKAGE_PREBUILTS_USBDRIVER_HID
+	help
+		Support UIBC For APPS
+
+endif

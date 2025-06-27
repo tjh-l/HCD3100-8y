@@ -1,0 +1,62 @@
+diff --git a/newlib/libc/ssp/stack_protector.c b/newlib/libc/ssp/stack_protector.c
+index ee014b6..f7defb7 100644
+--- a/newlib/libc/ssp/stack_protector.c
++++ b/newlib/libc/ssp/stack_protector.c
+@@ -25,14 +25,53 @@ __stack_chk_init (void)
+ #endif
+ }
+ 
++#define SR_IE                  0x00000001      /* Interrupt Enable, current */
++
++#define __write_32bit_c0_register(register, sel, value)			\
++do {									\
++	if (sel == 0)							\
++		__asm__ __volatile__(					\
++			"mtc0\t%z0, " #register "\n\t"			\
++			: : "Jr" ((unsigned int)(value)));		\
++	else								\
++		__asm__ __volatile__(					\
++			".set\tmips32\n\t"				\
++			"mtc0\t%z0, " #register ", " #sel "\n\t"	\
++			".set\tmips0"					\
++			: : "Jr" ((unsigned int)(value)));		\
++} while (0)
++
++
++#define __read_32bit_c0_register(source, sel)				\
++({ unsigned int __res;							\
++	if (sel == 0)							\
++		__asm__ __volatile__(					\
++			"mfc0\t%0, " #source "\n\t"			\
++			: "=r" (__res));				\
++	else								\
++		__asm__ __volatile__(					\
++			".set\tmips32\n\t"				\
++			"mfc0\t%0, " #source ", " #sel "\n\t"		\
++			".set\tmips0\n\t"				\
++			: "=r" (__res));				\
++	__res;								\
++})
++
++#define read_c0_status() __read_32bit_c0_register($12, 0)
++#define write_c0_status(val) __write_32bit_c0_register($12, 0, val)
++
+ void
+ __attribute__((__noreturn__))
+ __stack_chk_fail (void)
+ {
+-  char msg[] = "*** stack smashing detected ***: terminated\n";
+-  write (2, msg, strlen (msg));
+-  raise (SIGABRT);
+-  _exit (127);
++  unsigned int reg_val;
++
++  /* disable all interrupt */
++  reg_val = read_c0_status();
++  reg_val &= ~(SR_IE);
++  write_c0_status(reg_val);
++
++  while (1);
+ }
+ 
+ #ifdef __ELF__

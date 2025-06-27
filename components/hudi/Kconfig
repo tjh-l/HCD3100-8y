@@ -1,0 +1,94 @@
+menuconfig BR2_PACKAGE_HUDI
+	bool "hudi"
+	default n
+	help
+	  Hichip Uniform Driver Interface
+
+if BR2_PACKAGE_HUDI
+
+config BR2_PACKAGE_HUDI_FLASH
+	bool "flash"
+	default n
+	help
+	  Support flash operation interface
+
+config BR2_PACKAGE_HUDI_VIDEO
+	bool "video"
+	default n
+	help
+	  Support video driver interface
+
+config BR2_PACKAGE_HUDI_AUDIO
+	bool "audio"
+	default n
+	help
+	  Support audio driver interface
+
+config BR2_PACKAGE_HUDI_DISPLAY
+	bool "display"
+	default n
+	help
+	  Support display engine interface
+
+config BR2_PACKAGE_HUDI_AVSYNC
+	bool "avsync"
+	default n
+	help
+	  Support A/V sync interface
+
+config BR2_PACKAGE_HUDI_CEC
+	bool "cec"
+	default n
+	help
+	  Support hdmi cec interface
+
+config BR2_PACKAGE_HUDI_DSC
+	bool "dsc"
+	default n
+	help
+	  Support dsc interface
+
+config BR2_PACKAGE_HUDI_PERSISTENTMEM
+	bool "persistentmem"
+	default n
+	help
+	  Support persistentmem Interface
+
+config BR2_PACKAGE_HUDI_POWER
+	bool "power"
+	default n
+	help
+	  Support power interface
+
+config BR2_PACKAGE_HUDI_BLUETOOTH
+	bool "bluetooth"
+	default n
+	help
+	  Support bluetooth interface
+
+config BR2_PACKAGE_HUDI_HDMI
+	bool "hdmi"
+	default n
+	help
+	  Support hdmi interface
+
+config BR2_PACKAGE_HUDI_CVBS_RX
+	bool "cvbsrx"
+	default n
+	help
+	  Support cvbs_rx interface
+
+config BR2_PACKAGE_HUDI_SCREEN
+	bool "screen"
+	default n
+	help
+	  Support screen interface
+
+config BR2_PACKAGE_HUDI_HDMIRX
+	bool "hdmirx"
+	default n
+	help
+	  Support hdmi rx interface
+
+
+endif

@@ -1,0 +1,37 @@
+config BR2_PACKAGE_LIBUAC
+	bool "libuac"
+	select BR2_PACKAGE_PREBUILTS_USBDRIVE
+	select CONFIG_PIPES
+	select BR2_PACKAGE_PTHREAD
+	depends on BR2_PACKAGE_LIBUSB
+	default n
+	help
+		userspace library for accessing USB audio (UAC) devices driver
+
+config LIBUAC_NUM_TRANSFER_BUFS
+	int "libuac transfer buffer numbers (rang: 2 ~ 32)"
+	depends on BR2_PACKAGE_LIBUAC
+	range 2 32
+	default 20
+	help
+		set a high number of transfer buffers. This uses a lot of ram, but
+		avoids problems with scheduling delays on slow boards causing missed
+		transfers. A better approach may be to make the transfer thread FIFO
+		scheduled (if we have root).
+		Default number of transfer buffers can be overwritten by defining
+		this macro.
+
+config LIBUAC_MIC_RINGBUF_SIZE
+	int "ringbuffer size for store MICROPHONE stream data (unit:KByets)"
+	depends on BR2_PACKAGE_LIBUAC
+	range 10 1024
+	default 512
+	
+
+config BR2_PACKAGE_LIBUAC_EXAMPLES
+	bool "build libuac examples"
+	depends on BR2_PACKAGE_LIBUAC
+	select CONFIG_CMDS_USB
+	select CONFIG_CMDS_LIBUAC_EXAMPLES
+	help
+		examples for showing how to use libuac library

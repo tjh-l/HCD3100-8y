@@ -1,0 +1,1309 @@
+#include <errno.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <kernel/vfs.h>
+#include <kernel/io.h>
+#include <kernel/drivers/input.h>
+#include <hcuapi/input.h>
+#include <linux/timer.h>
+#include <kernel/completion.h>
+#include <linux/mutex.h>
+#include <linux/bug.h>
+#include <linux/bitmap.h>
+#include <hcuapi/sys-blocking-notify.h>
+#include <kernel/notify.h>
+#include <linux/minmax.h>
+
+
+static LIST_HEAD(input_dev_list);
+static LIST_HEAD(input_handler_list);
+static DEFINE_MUTEX(input_mutex);
+
+
+static uint32_t id_bitmap = 0xffffffff;
+static uint32_t mouse_id_bitmap = 0xffffffff;
+static uint32_t kbd_id_bitmap = 0xffffffff;
+
+static int input_get_disposition(struct input_dev *dev,
+			  unsigned int type, unsigned int code, int *pval);
+static void input_start_autorepeat(struct input_dev *dev, int code);
+static void input_stop_autorepeat(struct input_dev *dev);
+static inline int is_event_supported(unsigned int code,
+				     unsigned long *bm, unsigned int max);
+
+static int input_attach_handler(struct input_dev *dev, struct input_handler *handler);
+static const struct input_device_id *input_match_device(struct input_handler *handler,
+							struct input_dev *dev);
+static unsigned int input_to_handler(struct input_handle *handle,
+			struct input_event *vals, unsigned int count);
+
+struct input_instance {
+	struct list_head list;
+	wait_queue_head_t wait;
+	struct completion completion;
+	bool closed;
+};
+
+
+static int input_open(struct file *filep)
+{
+	struct inode *inode = filep->f_inode;
+	struct input_dev *dev = inode->i_private;
+	struct input_instance *ins;
+
+	ins = zalloc(sizeof(struct input_instance));
+	if(!ins) {
+		printf("[Error] Cannot alloc input instance\n");
+		return -1;
+	}
+
+	if (dev->open)
+		dev->open(dev);
+
+	filep->f_priv = ins;
+
+	init_waitqueue_head(&ins->wait);
+	list_add_tail(&ins->list, &dev->instance_list);
+	init_completion(&ins->completion);
+
+	return 0;
+}
+
+static int input_close(struct file *filep)
+{
+	struct inode *inode = filep->f_inode;
+	struct input_dev *dev = inode->i_private;
+	struct input_instance *ins = filep->f_priv;
+
+	if(ins) {
+		if(!list_empty(&ins->wait.task_list)) {
+			ins->closed = true;
+			wake_up(&ins->wait);
+			while(!list_empty(&ins->wait.task_list)) {
+				if(wait_for_completion_timeout(&ins->completion, 2))
+					break;
+			}
+		}
+
+		if( (ins->list.next != LIST_POISON1) && \
+				(ins->list.prev != LIST_POISON2))
+			list_del(&ins->list);
+		free(ins);
+	}
+
+	if (dev->close)
+		dev->close(dev);
+
+	return 0;
+}
+
+static ssize_t input_read(struct file *filep, char *buffer, size_t buflen)
+{
+	struct inode *inode = filep->f_inode;
+	struct input_dev *dev = inode->i_private;
+
+	spinlock_t lock;
+
+	if (kfifo_out_spinlocked(&dev->kfifo, (struct input_event *)buffer, 1, &lock))
+		return sizeof(struct input_event);
+	else
+		return 0;
+}
+
+static ssize_t input_write(struct file *filep, const char *buffer,
+			   size_t buflen)
+{
+	return 0;
+}
+
+static int input_poll(struct file *filep, poll_table *wait)
+{
+	struct inode *inode = filep->f_inode;
+	struct input_dev *dev = inode->i_private;
+	struct input_instance *ins = filep->f_priv;
+
+	int mask = 0;
+
+	if(ins->closed) {
+		complete(&ins->completion);
+		return -1;
+	}
+
+	poll_wait(filep, &ins->wait, wait);
+
+	if (!kfifo_is_empty(&dev->kfifo))
+		mask |= POLLIN | POLLRDNORM;
+
+	return mask;
+}
+
+int input_get_keycode(struct input_dev *dev, struct input_keymap_entry *ke)
+{
+	unsigned long flags;
+	int retval;
+
+	spin_lock_irqsave(&dev->event_lock, flags);
+	retval = dev->getkeycode(dev, ke);
+	spin_unlock_irqrestore(&dev->event_lock, flags);
+
+	return retval;
+}
+
+int input_set_keycode(struct input_dev *dev,
+		      const struct input_keymap_entry *ke)
+{
+	unsigned long flags;
+	unsigned int old_keycode;
+	int retval;
+
+	if (ke->keycode > KEY_MAX)
+		return -EINVAL;
+
+	spin_lock_irqsave(&dev->event_lock, flags);
+	retval = dev->setkeycode(dev, ke, &old_keycode);
+	spin_unlock_irqrestore(&dev->event_lock, flags);
+
+	return retval;
+}
+
+static int evdev_handle_get_keycode_v2(struct input_dev *dev, void *p)
+{
+	struct input_keymap_entry *ke = (struct input_keymap_entry *)p;
+	int error;
+
+	error = input_get_keycode(dev, ke);
+	if (error)
+		return error;
+
+	return 0;
+}
+
+static int evdev_handle_set_keycode_v2(struct input_dev *dev, void *p)
+{
+	struct input_keymap_entry *ke = (struct input_keymap_entry *)p;
+
+	if (ke->len > sizeof(ke->scancode))
+		return -EINVAL;
+
+	return input_set_keycode(dev, ke);
+}
+
+static int str_to_user(const char *str, unsigned int maxlen, void __user *p)
+{
+	void *ret = NULL;
+	unsigned int len;
+
+	if (!str)
+		return -ENOENT;
+
+	len = strlen(str) + 1;
+	if (len > maxlen)
+		len = maxlen;
+
+	ret = memcpy(p, str, len);
+	if (ret == NULL)
+		return -EFAULT;
+
+	return len;
+}
+
+/**
+ * input_grab_device - grabs device for exclusive use
+ * @handle: input handle that wants to own the device
+ *
+ * When a device is grabbed by an input handle all events generated by
+ * the device are delivered only to this handle. Also events injected
+ * by other input handles are ignored while device is grabbed.
+ */
+int input_grab_device(struct input_dev *dev)
+{
+	int retval;
+
+	retval = mutex_lock_interruptible(&dev->mutex);
+	if (retval)
+		return retval;
+
+	if (dev->grab) {
+		retval = -EBUSY;
+		goto out;
+	}
+
+	dev->grab = (struct input_handle *)0xffffffff;
+out:
+	mutex_unlock(&dev->mutex);
+	return retval;
+}
+
+int input_ungrab_device(struct input_dev *dev)
+{
+	int retval;
+
+	retval = mutex_lock_interruptible(&dev->mutex);
+	if (retval)
+		return retval;
+
+	if (dev->grab != NULL)
+		dev->grab = NULL;
+out:
+	mutex_unlock(&dev->mutex);
+	return retval;
+}
+
+static int bits_to_user(unsigned long *bits, unsigned int maxbit,
+                        unsigned int maxlen, void __user *p, int compat)
+{
+        int len = BITS_TO_LONGS(maxbit) * sizeof(long);
+
+        if (len > maxlen)
+                len = maxlen;
+
+	memcpy(p, bits, len);
+
+	return 1;
+}
+
+static int bits_from_user(unsigned long *bits, unsigned int maxbit,
+                          unsigned int maxlen, const void __user *p, int compat)
+{
+        int len;
+
+        if (maxlen % sizeof(long))
+                return -EINVAL;
+
+        len = BITS_TO_LONGS(maxbit) * sizeof(long);
+        if (len > maxlen)
+                len = maxlen;
+
+        memcpy(bits, p, len);
+
+        return 1;
+}
+
+static int handle_eviocgbit(struct input_dev *dev, unsigned int type, unsigned int size, void __user *p,
+			    int compat_mode)
+{
+        unsigned long *bits;
+        int len;
+
+        switch (type) {
+
+        case      0: bits = dev->evbit;  len = EV_MAX;  break;
+        case EV_KEY: bits = dev->keybit; len = KEY_MAX; break;
+        case EV_REL: bits = dev->relbit; len = REL_MAX; break;
+        case EV_ABS: bits = dev->absbit; len = ABS_MAX; break;
+        case EV_MSC: bits = dev->mscbit; len = MSC_MAX; break;
+        case EV_LED: bits = dev->ledbit; len = LED_MAX; break;
+       // case EV_SND: bits = dev->sndbit; len = SND_MAX; break;
+       // case EV_FF:  bits = dev->ffbit;  len = FF_MAX;  break;
+       // case EV_SW:  bits = dev->swbit;  len = SW_MAX;  break;
+        default: return -EINVAL;
+        }
+
+        return bits_to_user(bits, len, size, p, compat_mode);
+}
+
+static int input_ioctl(struct file *filep, int cmd, unsigned long arg)
+{
+	struct inode *inode = filep->f_inode;
+	struct input_dev *dev = inode->i_private;
+	struct input_absinfo abs;
+	unsigned int size, t;
+
+	switch (cmd) {
+
+	case EVIOCGRAB:
+		if (arg)
+			return input_grab_device(dev);
+		else
+			return input_ungrab_device(dev);
+
+	case EVIOCGKEYCODE:
+		return evdev_handle_get_keycode_v2(dev, (void *)arg);
+
+	case EVIOCSKEYCODE:
+		return evdev_handle_set_keycode_v2(dev, (void *)arg);
+	default:
+		break;
+	}
+
+	size = _IOC_SIZE(cmd);
+
+	/* Now check variable-length commands */
+#define EVIOC_MASK_SIZE(nr)     ((nr) & ~(_IOC_SIZEMASK << _IOC_SIZESHIFT))
+	switch (EVIOC_MASK_SIZE(cmd)) {
+
+	case EVIOCGNAME(0):
+		return str_to_user(dev->name, size, (void __user *)arg);
+	default:
+		break;
+	}
+
+	if (_IOC_DIR(cmd) == _IOC_READ) {
+
+		if ((_IOC_NR(cmd) & ~EV_MAX) == _IOC_NR(EVIOCGBIT(0, 0)))
+			return handle_eviocgbit(dev, _IOC_NR(cmd) & EV_MAX, size, (void __user *)arg, 0);
+
+		if ((_IOC_NR(cmd) & ~ABS_MAX) == _IOC_NR(EVIOCGABS(0))) {
+
+			if (!dev->absinfo)
+				return -EINVAL;
+
+			t = _IOC_NR(cmd) & ABS_MAX;
+			abs = dev->absinfo[t];
+
+			memcpy((void __user *)arg, &abs, min_t(size_t, size, sizeof(struct input_absinfo)));
+
+			return 0;
+		}
+	}
+
+	if (dev->ioctl) {
+		dev->ioctl(filep,cmd,arg);
+	}
+	return 0;
+}
+
+static const struct file_operations input_ops = {
+	.open = input_open, /* open */
+	.close = input_close, /* close */
+	.read = input_read, /* read */
+	.write = input_write, /* write */
+	.seek = NULL, /* seek */
+	.ioctl = input_ioctl, /* ioctl */
+	.poll = input_poll /* poll */
+#ifndef CONFIG_DISABLE_PSEUDOFS_OPERATIONS
+	,
+	.unlink = NULL /* unlink */
+#endif
+};
+
+static void input_pass_event(struct input_dev *dev, unsigned int type, unsigned int code,
+		 int value)
+{
+	struct timeval tv1;
+	gettimeofday(&tv1, NULL);
+
+	struct input_event event = { tv1, type, code, value };
+	spinlock_t lock;
+	struct input_instance *ins;
+	struct list_head *curr, *tmp;
+
+	kfifo_in_spinlocked(&dev->kfifo, &event, 1, &lock);
+
+	list_for_each_safe (curr, tmp, &dev->instance_list) {
+		ins = (struct input_instance *)curr;
+		assert(ins->closed == false);
+		if(ins && !list_empty(&ins->wait.task_list))
+			wake_up(&ins->wait);
+	}
+}
+
+static void input_pass_events(struct input_dev *dev, struct input_event *vals, unsigned int count)
+{
+	unsigned int i;
+	struct input_event *v = vals;
+	spinlock_t lock;
+	struct input_instance *ins;
+	struct list_head *curr, *tmp;
+	struct input_handle *handle;
+
+	if(!count)
+		return;
+
+	for(i = 0; i < count; i++){
+		v = vals + i;
+		kfifo_in_spinlocked(&dev->kfifo, v, 1, &lock);
+	}
+
+	list_for_each_entry(handle, &dev->h_list, d_node)
+		if (handle->open) {
+			count = input_to_handler(handle, vals, count);
+			if (!count)
+				break;
+		}
+
+	list_for_each_safe (curr, tmp, &dev->instance_list) {
+		ins = (struct input_instance *)curr;
+		assert(ins->closed == false);
+		if(ins && !list_empty(&ins->wait.task_list))
+			wake_up(&ins->wait);
+	}
+
+	/* trigger auto repeat for key events */
+	if (test_bit(EV_REP, dev->evbit) && test_bit(EV_KEY, dev->evbit)) {
+		for (v = vals; v != vals + count; v++) {
+			if (v->type == EV_KEY && v->value != 2) {
+				if (v->value)
+					input_start_autorepeat(dev, v->code);
+				else
+					input_stop_autorepeat(dev);
+			}
+		}
+	}
+}
+
+#define INPUT_IGNORE_EVENT	0
+#define INPUT_PASS_TO_HANDLERS	1
+#define INPUT_PASS_TO_DEVICE	2
+#define INPUT_SLOT		4
+#define INPUT_FLUSH		8
+#define INPUT_PASS_TO_ALL	(INPUT_PASS_TO_HANDLERS | INPUT_PASS_TO_DEVICE)
+
+static int input_defuzz_abs_event(int value, int old_val, int fuzz)
+{
+	if (fuzz) {
+		if (value > old_val - fuzz / 2 && value < old_val + fuzz / 2)
+			return old_val;
+
+		if (value > old_val - fuzz && value < old_val + fuzz)
+			return (old_val * 3 + value) / 4;
+
+		if (value > old_val - fuzz * 2 && value < old_val + fuzz * 2)
+			return (old_val + value) / 2;
+	}
+
+	return value;
+}
+
+static int input_handle_abs_event(struct input_dev *dev,
+				  unsigned int code, int *pval)
+{
+	struct input_mt *mt = dev->mt;
+	bool is_mt_event;
+	int *pold;
+
+	if (code == ABS_MT_SLOT) {
+		/*
+		 * "Stage" the event; we'll flush it later, when we
+		 * get actual touch data.
+		 */
+		if (mt && *pval >= 0 && *pval < mt->num_slots)
+			mt->slot = *pval;
+
+		return INPUT_IGNORE_EVENT;
+	}
+
+	is_mt_event = input_is_mt_value(code);
+
+	if (!is_mt_event) {
+		pold = &dev->absinfo[code].value;
+	} else if (mt) {
+		pold = &mt->slots[mt->slot].abs[code - ABS_MT_FIRST];
+	} else {
+		/*
+		 * Bypass filtering for multi-touch events when
+		 * not employing slots.
+		 */
+		pold = NULL;
+	}
+
+	if (pold) {
+		*pval = input_defuzz_abs_event(*pval, *pold,
+						dev->absinfo[code].fuzz);
+		if (*pold == *pval)
+			return INPUT_IGNORE_EVENT;
+
+		*pold = *pval;
+	}
+
+	/* Flush pending "slot" event */
+	if (is_mt_event && mt && mt->slot != input_abs_get_val(dev, ABS_MT_SLOT)) {
+		input_abs_set_val(dev, ABS_MT_SLOT, mt->slot);
+		input_pass_event(dev, EV_ABS, ABS_MT_SLOT, mt->slot);
+		return INPUT_PASS_TO_HANDLERS | INPUT_SLOT;
+	}
+
+	return INPUT_PASS_TO_HANDLERS;
+}
+
+
+void input_event(struct input_dev *dev, unsigned int type, unsigned int code,
+		 int value)
+{
+	int disposition = INPUT_PASS_TO_HANDLERS;
+	struct input_event event;
+
+	disposition = input_get_disposition(dev, type, code, &value);
+
+	if ((disposition & INPUT_PASS_TO_DEVICE) && dev->event)
+		dev->event(dev, type, code, value);
+
+	if (disposition & INPUT_PASS_TO_HANDLERS){
+		struct timeval tv1;
+		gettimeofday(&tv1, NULL);
+
+		event.time = tv1;
+		event.type = type;
+		event.code = code;
+		event.value = value;
+		input_pass_events(dev, &event, 1);
+	}
+}
+
+int input_register_device(struct input_dev *dev)
+{
+	int id = ffs(id_bitmap) - 1;
+	char path[128];
+	struct input_handler *handler;
+	struct removable_notify_info notify_info = { 0 };
+
+	dev->id = id;
+	id_bitmap &= ~BIT(id);
+
+	memset(path, 0, sizeof(path));
+	sprintf(path, "/dev/input/event%d", id);
+	if (dev->name == NULL)
+		printf("register %s\n", path);
+	else
+		printf("%s register %s\n", dev->name, path);
+
+	/*
+	 * If delay and period are pre-set by the driver, then autorepeating
+	 * is handled by the driver itself and we don't do it in input.c.
+	 */
+	if (!dev->rep[REP_DELAY] && !dev->rep[REP_PERIOD])
+		input_enable_softrepeat(dev, 250, 33);
+
+	register_driver(path, &input_ops, 0666, dev);
+
+	list_add_tail(&dev->node, &input_dev_list);
+	list_for_each_entry(handler, &input_handler_list, node)
+		input_attach_handler(dev, handler);
+
+	sprintf(notify_info.devname, "event%d", id);
+	sys_notify_event(INPUT_DEV_NOTIFY_CONNECT, (void *)&notify_info);
+
+	return 0;
+}
+
+int input_register_mouse_device(struct input_dev *dev)
+{
+	int id = ffs(mouse_id_bitmap) - 1;
+	char path[128];
+	struct removable_notify_info notify_info = { 0 };
+
+	dev->id = id;
+	mouse_id_bitmap &= ~BIT(id);
+
+	memset(path, 0, sizeof(path));
+	sprintf(path, "/dev/input/mouse%d", id);
+	printf("register %s\n", path);
+
+	/*
+	 * If delay and period are pre-set by the driver, then autorepeating
+	 * is handled by the driver itself and we don't do it in input.c.
+	 */
+	if (!dev->rep[REP_DELAY] && !dev->rep[REP_PERIOD])
+		input_enable_softrepeat(dev, 250, 33);
+
+	register_driver(path, &input_ops, 0666, dev);
+
+	sprintf(notify_info.devname, "mouse%d", id);
+	sys_notify_event(INPUT_DEV_NOTIFY_CONNECT, (void *)&notify_info);
+
+	return 0;
+}
+
+int input_register_kbd_device(struct input_dev *dev)
+{
+	int id = ffs(kbd_id_bitmap) - 1;
+	char path[128];
+	struct removable_notify_info notify_info = { 0 };
+
+	dev->id = id;
+	kbd_id_bitmap &= ~BIT(id);
+
+	memset(path, 0, sizeof(path));
+	sprintf(path, "/dev/input/kbd%d", id);
+	printf("register %s\n", path);
+
+	/*
+	 * If delay and period are pre-set by the driver, then autorepeating
+	 * is handled by the driver itself and we don't do it in input.c.
+	 */
+	if (!dev->rep[REP_DELAY] && !dev->rep[REP_PERIOD])
+		input_enable_softrepeat(dev, 250, 33);
+
+	register_driver(path, &input_ops, 0666, dev);
+
+	sprintf(notify_info.devname, "kbd%d", id);
+	sys_notify_event(INPUT_DEV_NOTIFY_CONNECT, (void *)&notify_info);
+
+	return 0;
+}
+
+void input_unregister_device(struct input_dev *dev)
+{
+	char path[128];
+	int id = dev->id;
+	struct input_instance *ins;
+	struct list_head *curr, *tmp;
+	struct input_handle *handle, *next;
+	struct removable_notify_info notify_info = { 0 };
+
+	memset(path, 0, sizeof(path));
+	sprintf(path, "/dev/input/event%d", id);
+	printf("unregister %s\n", path);
+
+	mutex_lock(&dev->mutex);
+	dev->going_away = true;
+	mutex_unlock(&dev->mutex);
+
+	list_for_each_safe (curr, tmp, &dev->instance_list) {
+		ins = (struct input_instance *)curr;
+		if(ins && !list_empty(&ins->wait.task_list)) {
+			ins->closed = true;
+			wake_up(&ins->wait);
+
+			if( (ins->list.next != LIST_POISON1) && \
+					(ins->list.prev != LIST_POISON2))
+				list_del(&ins->list);
+			while(!list_empty(&ins->wait.task_list)) {
+				if(wait_for_completion_timeout(&ins->completion, 2))
+					break;
+			}
+		}
+	}
+
+	unregister_driver(path);
+	id_bitmap |= BIT(id);
+
+	sprintf(notify_info.devname, "event%d", id);
+	sys_notify_event(INPUT_DEV_NOTIFY_DISCONNECT, (void *)&notify_info);
+
+	mutex_lock(&input_mutex);
+
+	list_for_each_entry_safe(handle, next, &dev->h_list, d_node)
+		handle->handler->disconnect(handle);
+	list_del_init(&dev->node);
+	WARN_ON(!list_empty(&dev->h_list));
+
+	mutex_unlock(&input_mutex);
+}
+
+void input_unregister_mouse_device(struct input_dev *dev)
+{
+	char path[128];
+	int id = dev->id;
+	struct input_instance *ins;
+	struct list_head *curr, *tmp;
+	struct removable_notify_info notify_info = { 0 };
+
+	memset(path, 0, sizeof(path));
+	sprintf(path, "/dev/input/mouse%d", id);
+	printf("unregister %s\n", path);
+
+	list_for_each_safe (curr, tmp, &dev->instance_list) {
+		ins = (struct input_instance *)curr;
+		if(ins && !list_empty(&ins->wait.task_list)) {
+			ins->closed = true;
+			wake_up(&ins->wait);
+
+			if( (ins->list.next != LIST_POISON1) && \
+					(ins->list.prev != LIST_POISON2))
+				list_del(&ins->list);
+			while(!list_empty(&ins->wait.task_list)) {
+				if(wait_for_completion_timeout(&ins->completion, 2))
+					break;
+			}
+		}
+	}
+
+	unregister_driver(path);
+	mouse_id_bitmap |= BIT(id);
+
+	sprintf(notify_info.devname, "mouse%d", id);
+	sys_notify_event(INPUT_DEV_NOTIFY_DISCONNECT, (void *)&notify_info);
+}
+
+void input_unregister_kbd_device(struct input_dev *dev)
+{
+	char path[128];
+	int id = dev->id;
+	struct input_instance *ins;
+	struct list_head *curr, *tmp;
+	struct removable_notify_info notify_info = { 0 };
+
+	memset(path, 0, sizeof(path));
+	sprintf(path, "/dev/input/kbd%d", id);
+	printf("unregister %s\n", path);
+
+	list_for_each_safe (curr, tmp, &dev->instance_list) {
+		ins = (struct input_instance *)curr;
+		if(ins && !list_empty(&ins->wait.task_list)) {
+			ins->closed = true;
+			wake_up(&ins->wait);
+
+			if( (ins->list.next != LIST_POISON1) && \
+					(ins->list.prev != LIST_POISON2))
+				list_del(&ins->list);
+			while(!list_empty(&ins->wait.task_list)) {
+				if(wait_for_completion_timeout(&ins->completion, 2))
+					break;
+			}
+		}
+	}
+
+	unregister_driver(path);
+	kbd_id_bitmap |= BIT(id);
+
+	sprintf(notify_info.devname, "kbd%d", id);
+	sys_notify_event(INPUT_DEV_NOTIFY_DISCONNECT, (void *)&notify_info);
+}
+
+struct input_dev *input_allocate_device(void)
+{
+	struct input_dev *dev = malloc(sizeof(*dev));
+
+	if (!dev)
+		return NULL;
+
+	memset(dev, 0, sizeof(*dev));
+
+	INIT_KFIFO(dev->kfifo);
+	init_timer(&dev->timer);
+	INIT_LIST_HEAD(&dev->instance_list);
+	INIT_LIST_HEAD(&dev->h_list);
+	mutex_init(&dev->mutex);
+
+	return dev;
+}
+
+void input_free_device(struct input_dev *dev)
+{
+	free(dev);
+}
+
+void input_alloc_absinfo(struct input_dev *dev)
+{
+	if (!dev->absinfo)
+		dev->absinfo = kcalloc(ABS_CNT, sizeof(struct input_absinfo),
+					GFP_KERNEL);
+}
+
+void input_set_abs_params(struct input_dev *dev, unsigned int axis,
+			  int min, int max, int fuzz, int flat)
+{
+	struct input_absinfo *absinfo;
+
+	input_alloc_absinfo(dev);
+	if (!dev->absinfo)
+		return;
+
+	absinfo = &dev->absinfo[axis];
+	absinfo->minimum = min;
+	absinfo->maximum = max;
+	absinfo->fuzz = fuzz;
+	absinfo->flat = flat;
+}
+
+static int input_get_disposition(struct input_dev *dev,
+			  unsigned int type, unsigned int code, int *pval)
+{
+	int disposition = INPUT_IGNORE_EVENT;
+	int value = *pval;
+
+	switch (type) {
+
+	case EV_SYN:
+		switch (code) {
+		case SYN_CONFIG:
+			disposition = INPUT_PASS_TO_ALL;
+			break;
+
+		case SYN_REPORT:
+			disposition = INPUT_PASS_TO_HANDLERS | INPUT_FLUSH;
+			break;
+		case SYN_MT_REPORT:
+			disposition = INPUT_PASS_TO_HANDLERS;
+			break;
+		}
+		break;
+
+	case EV_KEY:
+		/* auto-repeat bypasses state updates */
+		if (value == 2) {
+			disposition = INPUT_PASS_TO_HANDLERS;
+			break;
+		}
+
+		if (!!test_bit(code, dev->key) != !!value) {
+
+			__change_bit(code, dev->key);
+			disposition = INPUT_PASS_TO_HANDLERS;
+		}
+			disposition = INPUT_PASS_TO_HANDLERS;
+		break;
+
+	// case EV_SW:
+	// 	if (is_event_supported(code, dev->swbit, SW_MAX) &&
+	// 	    !!test_bit(code, dev->sw) != !!value) {
+
+	// 		__change_bit(code, dev->sw);
+	// 		disposition = INPUT_PASS_TO_HANDLERS;
+	// 	}
+	// 	break;
+
+	case EV_ABS:
+		disposition = input_handle_abs_event(dev, code, &value);
+		break;
+
+	case EV_REL:
+		disposition = INPUT_PASS_TO_HANDLERS;
+
+		break;
+
+	case EV_MSC:
+		disposition = INPUT_PASS_TO_ALL;
+		break;
+
+	case EV_LED:
+		// if (is_event_supported(code, dev->ledbit, LED_MAX) &&
+		//     !!test_bit(code, dev->led) != !!value) {
+
+			__change_bit(code, dev->led);
+			disposition = INPUT_PASS_TO_ALL;
+		// }
+		break;
+
+	// case EV_SND:
+	// 	if (is_event_supported(code, dev->sndbit, SND_MAX)) {
+
+	// 		if (!!test_bit(code, dev->snd) != !!value)
+	// 			__change_bit(code, dev->snd);
+	// 		disposition = INPUT_PASS_TO_ALL;
+	// 	}
+	// 	break;
+
+	// case EV_REP:
+	// 	if (code <= REP_MAX && value >= 0 && dev->rep[code] != value) {
+	// 		dev->rep[code] = value;
+	// 		disposition = INPUT_PASS_TO_ALL;
+	// 	}
+	// 	break;
+
+	// case EV_FF:
+	// 	if (value >= 0)
+	// 		disposition = INPUT_PASS_TO_ALL;
+	// 	break;
+
+	// case EV_PWR:
+	// 	disposition = INPUT_PASS_TO_ALL;
+	// 	break;
+	}
+
+	*pval = value;
+	return disposition;
+}
+
+static const struct input_event input_value_sync = { { .tv_sec = 0, .tv_usec = 0 }, EV_SYN, SYN_REPORT, 1 };
+
+static inline int is_event_supported(unsigned int code,
+				     unsigned long *bm, unsigned int max)
+{
+	return code <= max && test_bit(code, bm);
+}
+
+
+static void input_start_autorepeat(struct input_dev *dev, int code)
+{
+	if (test_bit(EV_REP, dev->evbit) &&
+	    dev->rep[REP_PERIOD] && dev->rep[REP_DELAY] &&
+	    dev->timer.data) {
+		dev->repeat_key = code;
+		mod_timer(&dev->timer,
+			  jiffies + msecs_to_jiffies(dev->rep[REP_DELAY]));
+	}
+}
+
+static void input_stop_autorepeat(struct input_dev *dev)
+{
+	del_timer(&dev->timer);
+}
+
+/*
+ * Generate software autorepeat event. Note that we take
+ * dev->event_lock here to avoid racing with input_event
+ * which may cause keys get "stuck".
+ */
+static void input_repeat_key(unsigned long data)
+{
+	struct input_dev *dev = (void *) data;
+	unsigned long flags;
+	struct timeval tv1;
+	gettimeofday(&tv1, NULL);
+
+	spin_lock_irqsave(&dev->event_lock, flags);
+
+	if (test_bit(dev->repeat_key, dev->key) &&
+	    is_event_supported(dev->repeat_key, dev->keybit, KEY_MAX)) {
+		struct input_event vals[] =  {
+			{ tv1, EV_KEY, dev->repeat_key, 2 },
+			input_value_sync
+		};
+
+		input_pass_events(dev, vals, ARRAY_SIZE(vals));
+
+		if (dev->rep[REP_PERIOD])
+			mod_timer(&dev->timer, jiffies +
+					msecs_to_jiffies(dev->rep[REP_PERIOD]));
+	}
+
+	spin_unlock_irqrestore(&dev->event_lock, flags);
+}
+
+/**
+ * input_enable_softrepeat - enable software autorepeat
+ * @dev: input device
+ * @delay: repeat delay
+ * @period: repeat period
+ *
+ * Enable software autorepeat on the input device.
+ */
+void input_enable_softrepeat(struct input_dev *dev, int delay, int period)
+{
+	dev->timer.data = (unsigned long) dev;
+	dev->timer.function = input_repeat_key;
+	dev->rep[REP_DELAY] = delay;
+	dev->rep[REP_PERIOD] = period;
+}
+
+
+int input_register_handler(struct input_handler *handler)
+{
+	struct input_dev *dev;
+	int error;
+
+	error = mutex_lock_interruptible(&input_mutex);
+	if (error)
+		return error;
+
+	INIT_LIST_HEAD(&handler->h_list);
+	list_add_tail(&handler->node, &input_handler_list);
+
+	list_for_each_entry(dev, &input_dev_list, node)
+		input_attach_handler(dev, handler);
+
+	mutex_unlock(&input_mutex);
+	return 0;
+}
+
+void input_unregister_handler(struct input_handler *handler)
+{
+	struct input_handle *handle, *next;
+
+	mutex_lock(&input_mutex);
+
+	list_for_each_entry_safe(handle, next, &handler->h_list, h_node)
+		handler->disconnect(handle);
+	WARN_ON(!list_empty(&handler->h_list));
+
+	list_del_init(&handler->node);
+
+	mutex_unlock(&input_mutex);
+}
+
+static int input_attach_handler(struct input_dev *dev, struct input_handler *handler)
+{
+	const struct input_device_id *id;
+	int error;
+
+	id = input_match_device(handler, dev);
+	if (!id)
+		return -ENODEV;
+
+	error = handler->connect(handler, dev, id);
+	if (error && error != -ENODEV)
+		pr_err("failed to attach handler %s, error: %d\n",
+		       handler->name, error);
+
+	return error;
+}
+
+static const struct input_device_id *input_match_device(struct input_handler *handler,
+							struct input_dev *dev)
+{
+	const struct input_device_id *id;
+
+	for (id = handler->id_table; id->flags; id++) {
+
+		if (id->flags & INPUT_DEVICE_ID_MATCH_BUS)
+			if (id->bustype != dev->__id.bustype)
+				continue;
+
+		if (id->flags & INPUT_DEVICE_ID_MATCH_VENDOR)
+			if (id->vendor != dev->__id.vendor)
+				continue;
+
+		if (id->flags & INPUT_DEVICE_ID_MATCH_PRODUCT)
+			if (id->product != dev->__id.product)
+				continue;
+
+		if (id->flags & INPUT_DEVICE_ID_MATCH_VERSION)
+			if (id->version != dev->__id.version)
+				continue;
+
+		if (!bitmap_subset(id->evbit, dev->evbit, EV_MAX))
+			continue;
+
+		if (!bitmap_subset(id->keybit, dev->keybit, KEY_MAX))
+			continue;
+
+		if (!bitmap_subset(id->relbit, dev->relbit, REL_MAX))
+			continue;
+
+		if (!bitmap_subset(id->absbit, dev->absbit, ABS_MAX))
+			continue;
+
+		if (!bitmap_subset(id->mscbit, dev->mscbit, MSC_MAX))
+			continue;
+
+		if (!bitmap_subset(id->ledbit, dev->ledbit, LED_MAX))
+			continue;
+
+		// if (!bitmap_subset(id->sndbit, dev->sndbit, SND_MAX))
+		// 	continue;
+
+		// if (!bitmap_subset(id->ffbit, dev->ffbit, FF_MAX))
+		// 	continue;
+
+		// if (!bitmap_subset(id->swbit, dev->swbit, SW_MAX))
+		// 	continue;
+
+		if (!handler->match || handler->match(handler, dev))
+			return id;
+	}
+
+	return NULL;
+}
+
+int input_register_handle(struct input_handle *handle)
+{
+	struct input_handler *handler = handle->handler;
+	struct input_dev *dev = handle->dev;
+	int error;
+
+	/*
+	 * We take dev->mutex here to prevent race with
+	 * input_release_device().
+	 */
+	error = mutex_lock_interruptible(&dev->mutex);
+	if (error)
+		return error;
+
+	/*
+	 * Filters go to the head of the list, normal handlers
+	 * to the tail.
+	 */
+	if (handler->filter)
+		list_add(&handle->d_node, &dev->h_list);
+	else
+		list_add_tail(&handle->d_node, &dev->h_list);
+
+	mutex_unlock(&dev->mutex);
+
+	/*
+	 * Since we are supposed to be called from ->connect()
+	 * which is mutually exclusive with ->disconnect()
+	 * we can't be racing with input_unregister_handle()
+	 * and so separate lock is not needed here.
+	 */
+	list_add_tail(&handle->h_node, &handler->h_list);
+
+	if (handler->start)
+		handler->start(handle);
+
+	return 0;
+}
+
+void input_unregister_handle(struct input_handle *handle)
+{
+	struct input_dev *dev = handle->dev;
+
+	// list_del_rcu(&handle->h_node);
+	list_del(&handle->h_node);
+
+	/*
+	 * Take dev->mutex to prevent race with input_release_device().
+	 */
+	mutex_lock(&dev->mutex);
+	// list_del_rcu(&handle->d_node);
+	list_del(&handle->d_node);
+	mutex_unlock(&dev->mutex);
+
+	// synchronize_rcu();
+}
+
+static unsigned int input_to_handler(struct input_handle *handle,
+			struct input_event *vals, unsigned int count)
+{
+	struct input_handler *handler = handle->handler;
+	struct input_event *end = vals;
+	struct input_event *v;
+
+	if (handler->filter) {
+		for (v = vals; v != vals + count; v++) {
+			if (handler->filter(handle, v->type, v->code, v->value))
+				continue;
+			if (end != v)
+				*end = *v;
+			end++;
+		}
+		count = end - vals;
+	}
+
+	if (!count)
+		return 0;
+
+	if (handler->events)
+		handler->events(handle, vals, count);
+	else if (handler->event)
+		for (v = vals; v != vals + count; v++)
+			handler->event(handle, v->type, v->code, v->value);
+
+	return count;
+}
+
+static void __input_release_device(struct input_handle *handle)
+{
+	struct input_dev *dev = handle->dev;
+	// struct input_handle *grabber;
+
+	// grabber = rcu_dereference_protected(dev->grab,
+	// 				    lockdep_is_held(&dev->mutex));
+	// if (grabber == handle) {
+	// 	rcu_assign_pointer(dev->grab, NULL);
+	// 	/* Make sure input_pass_event() notices that grab is gone */
+	// 	synchronize_rcu();
+
+		list_for_each_entry(handle, &dev->h_list, d_node)
+			if (handle->open && handle->handler->start)
+				handle->handler->start(handle);
+	// }
+}
+
+int input_open_device(struct input_handle *handle)
+{
+	struct input_dev *dev = handle->dev;
+	int retval;
+
+	retval = mutex_lock_interruptible(&dev->mutex);
+	if (retval)
+		return retval;
+
+	if (dev->going_away) {
+		retval = -ENODEV;
+		goto out;
+	}
+
+	handle->open++;
+
+	if (!dev->users++ && dev->open)
+		retval = dev->open(dev);
+
+	if (retval) {
+		dev->users--;
+		// if (!--handle->open) {
+		// 	/*
+		// 	 * Make sure we are not delivering any more events
+		// 	 * through this handle
+		// 	 */
+		// 	synchronize_rcu();
+		// }
+	}
+
+ out:
+	mutex_unlock(&dev->mutex);
+	return retval;
+}
+
+void input_close_device(struct input_handle *handle)
+{
+	struct input_dev *dev = handle->dev;
+
+	mutex_lock(&dev->mutex);
+
+	__input_release_device(handle);
+
+	if (!--dev->users && dev->close)
+		dev->close(dev);
+
+	// if (!--handle->open) {
+	// 	/*
+	// 	 * synchronize_rcu() makes sure that input_pass_event()
+	// 	 * completed and that no more input events are delivered
+	// 	 * through this handle
+	// 	 */
+	// 	synchronize_rcu();
+	// }
+
+	mutex_unlock(&dev->mutex);
+}
+
+/**
+ * input_set_capability - mark device as capable of a certain event
+ * @dev: device that is capable of emitting or accepting event
+ * @type: type of the event (EV_KEY, EV_REL, etc...)
+ * @code: event code
+ *
+ * In addition to setting up corresponding bit in appropriate capability
+ * bitmap the function also adjusts dev->evbit.
+ */
+void input_set_capability(struct input_dev *dev, unsigned int type, unsigned int code)
+{
+	switch (type) {
+	case EV_KEY:
+		__set_bit(code, dev->keybit);
+		break;
+
+	case EV_REL:
+		__set_bit(code, dev->relbit);
+		break;
+
+	case EV_ABS:
+		input_alloc_absinfo(dev);
+		if (!dev->absinfo)
+			return;
+
+		__set_bit(code, dev->absbit);
+		break;
+
+	case EV_MSC:
+		__set_bit(code, dev->mscbit);
+		break;
+
+	// case EV_SW:
+	// 	__set_bit(code, dev->swbit);
+	// 	break;
+
+	case EV_LED:
+		__set_bit(code, dev->ledbit);
+		break;
+
+	// case EV_SND:
+	// 	__set_bit(code, dev->sndbit);
+	// 	break;
+
+	// case EV_FF:
+	// 	__set_bit(code, dev->ffbit);
+	// 	break;
+
+	case EV_PWR:
+		/* do nothing */
+		break;
+
+	default:
+		pr_err("input_set_capability: unknown type %u (code %u)\n",
+		       type, code);
+		dump_stack();
+		return;
+	}
+
+	__set_bit(type, dev->evbit);
+}
+// EXPORT_SYMBOL(input_set_capability);

@@ -1,0 +1,44 @@
+menuconfig BR2_PACKAGE_BLUETOOTH
+	bool "Bluetooth"
+	default n
+
+if BR2_PACKAGE_BLUETOOTH
+choice
+	prompt "Bluetooth Partnumber"
+	default BR2_PACKAGE_AD6956F
+config BR2_PACKAGE_NULLBT
+	bool "None"
+	help
+		No specific module
+config BR2_PACKAGE_AD6956F
+	bool "AD6956F"
+	help
+		Bluetooth ad6956f module api
+config BR2_PACKAGE_AC6955F
+	bool "AC6955F Set"
+	help
+		Bluetooth ac6955f module api
+endchoice
+
+if BR2_PACKAGE_AC6955F
+choice
+	prompt "AC6955F"
+	default BR2_PACKAGE_AC6955F_RT
+config BR2_PACKAGE_AC6955F_RT
+	bool "AC6955F RT"
+	help
+		Bluetooth ac6955f module api
+
+config BR2_PACKAGE_AC6955F_GX
+	bool "AC6955F GX"
+	help
+		Bluetooth ac6955f gx module api
+
+config BR2_PACKAGE_AC6956C_GX
+	bool "AC6956C GX"
+	help
+		Bluetooth AC6956C gx module api
+endchoice
+endif
+
+endif

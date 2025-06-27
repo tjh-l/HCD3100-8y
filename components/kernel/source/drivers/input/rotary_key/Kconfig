@@ -1,0 +1,7 @@
+config CONFIG_HC_SAL61955M
+	bool "sal61955m"
+	default n
+
+config CONFIG_HC_ES1106S
+	bool "es1106s"
+	default n

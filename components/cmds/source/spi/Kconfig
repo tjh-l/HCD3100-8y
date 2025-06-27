@@ -1,0 +1,14 @@
+menuconfig CONFIG_CMDS_FLASH_TEST
+	bool "flash test cmd"
+	default n
+
+if CONFIG_CMDS_FLASH_TEST
+
+config CONFIG_CMDS_FLASH_TORTURETEST
+	bool "flash torture test operations"
+	default n
+endif
+
+config CONFIG_CMDS_FLASH_LOCK_SAMPLE
+	bool "flash lock sample"
+	default n

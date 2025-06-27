@@ -1,0 +1,108 @@
+menuconfig BR2_PACKAGE_FFMPEG_PLUGINS_PARSERS
+	bool "ffmpeg parser plugins"
+	default y
+
+if BR2_PACKAGE_FFMPEG_PLUGINS_PARSERS
+
+config BR2_PACKAGE_FFMPEG_PARSER_MPEGAUDIO
+	bool "mpegaudio parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_AAC
+	bool "aac parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_AAC_LATM
+	bool "aac_latm parser"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_PARSER_FLAC
+	bool "flac parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_XMA
+	bool "xma parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_OPUS
+	bool "opus parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_VORBIS
+	bool "vorbis parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_COOK
+	bool "cook parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_AC3
+	bool "ac3 parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_MLP
+	bool "mlp parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_GSM
+	bool "gsm parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_SIPR
+	bool "sipr parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_MJPEG
+	bool "mjpeg parser"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_PARSER_PNG
+	bool "png parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_GIF
+	bool "gif parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_BMP
+	bool "bmp parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_WEBP
+	bool "webp parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_DVBSUB
+	bool "dvbsub parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_H264
+	bool "h264 parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_MPEGVIDEO
+	bool "mpegvideo parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_VC1
+	bool "vc1 parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_H263
+	bool "H263 parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_RV30
+	bool "rv30 parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_RV40
+	bool "rv40 parser"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PARSER_MPEG4VIDEO
+	bool "mpeg4video parser"
+	default n
+
+endif
+

@@ -1,0 +1,3 @@
+config BR2_PACKAGE_LIBSWISP
+	bool "lib sw isp"
+	default n

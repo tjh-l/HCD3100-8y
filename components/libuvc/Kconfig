@@ -1,0 +1,30 @@
+config BR2_PACKAGE_LIBUVC
+	bool "libuvc"
+	select BR2_PACKAGE_PREBUILTS_USBDRIVE
+	select CONFIG_PIPES
+	select BR2_PACKAGE_PTHREAD
+	depends on BR2_PACKAGE_LIBUSB
+	default n
+	help
+		userspace library for accessing USB camera devices driver
+
+config LIBUVC_NUM_TRANSFER_BUFS
+	int "libuvc transfer buffer numbers (rang: 2 ~ 100)"
+	depends on BR2_PACKAGE_LIBUVC
+	range 2 100
+	default 8
+	help
+		set a high number of transfer buffers. This uses a lot of ram, but
+		avoids problems with scheduling delays on slow boards causing missed
+		transfers. A better approach may be to make the transfer thread FIFO
+		scheduled (if we have root).
+		Default number of transfer buffers can be overwritten by defining
+		this macro.
+
+config BR2_PACKAGE_LIBUVC_EXAMPLES
+	bool "build libuvc examples"
+	depends on BR2_PACKAGE_LIBUVC
+	select CONFIG_CMDS_USB
+	select CONFIG_CMDS_LIBUVC_EXAMPLES
+	help
+		examples for showing how to use libuvc library

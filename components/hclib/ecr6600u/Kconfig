@@ -1,0 +1,6 @@
+config BR2_PACKAGE_ECR6600U
+	bool "ecr6600u wifi"
+	depends on CONFIG_NET
+	select CONFIG_DRV_LNXDRIVER
+	select CONFIG_DRV_SOFTIRQ
+	default n

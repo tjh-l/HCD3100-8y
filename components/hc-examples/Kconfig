@@ -1,0 +1,87 @@
+menuconfig BR2_PACKAGE_HC_EXAMPLES
+	bool "hc-examples"
+	default n
+
+if BR2_PACKAGE_HC_EXAMPLES
+config BR2_PACKAGE_HDMI_WIREELSS_EXAMPLE
+	bool "hdmi wireless example"
+	default n
+	select CONFIG_NET
+
+if BR2_PACKAGE_HDMI_WIREELSS_EXAMPLE
+choice
+	bool "hdmi wireless sample sending data way"
+	default BR2_PACKAGE_HDMI_WIRELSS_DISPLAY_RAW
+
+config BR2_PACKAGE_HDMI_WIRELSS_DISPLAY_RAW
+	bool "Calling netowork driver api directly"
+
+config BR2_PACKAGE_HDMI_WIRELSS_DISPLAY_TCP
+	bool "Using tcp"
+
+config BR2_PACKAGE_HDMI_WIRELSS_DISPLAY_UDP
+	bool "Using udp"
+
+endchoice
+endif
+
+config BR2_PACKAGE_VIDEO_PBP_EXAMPLES
+	bool "video picture by picture mode test examples"
+	default n
+
+config BR2_PACKAGE_SCREENSHOT_EXAMPLES
+	bool "screenshot examples"
+	default n
+
+config BR2_PACKAGE_BLUETOOTH_EXAMPLES
+	bool "bluetooth examples"
+	default n
+
+menuconfig BR2_PACKAGE_HDMIRX_EXAMPLES
+	bool "HDMI rx examples"
+	default n
+
+if BR2_PACKAGE_HDMIRX_EXAMPLES
+config CONFIG_CMDS_HDMI_RX_SORTING
+	bool "enable hdmrx sorting test"
+	default n
+endif
+
+
+config BR2_PACKAGE_TVDEC_EXAMPLES
+	bool "TV dec(CVBS rx) examples"
+	default n
+
+
+menuconfig BR2_PACKAGE_HCCAST_EXAMPLES
+	bool "hccast test examples"
+	default n
+
+if BR2_PACKAGE_HCCAST_EXAMPLES
+config BR2_PACKAGE_HCCAST_WIFI_CAST_EXAMPLES
+	bool "hccast wifi cast test examples"
+	default n
+
+config BR2_PACKAGE_HCCAST_USB_CAST_EXAMPLES
+	bool "hccast usb test examples"
+	default n
+
+endif
+
+
+
+menuconfig BR2_PACKAGE_HC_EXAMPLES_HUDI
+	bool "hudi examples"
+	default n
+
+if BR2_PACKAGE_HC_EXAMPLES_HUDI
+config BR2_PACKAGE_HC_EXAMPLES_HUDI_CEC
+    bool "hudi cec example"
+	select BR2_PACKAGE_HUDI_CEC 
+    default n
+    help
+      hdmi cec interface example
+endif
+
+endif
+

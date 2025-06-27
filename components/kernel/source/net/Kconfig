@@ -1,0 +1,121 @@
+menu "Net"
+menuconfig CONFIG_NET
+	bool "Enable network"
+	default n
+
+if CONFIG_NET
+config CONFIG_NET_LWIP_SACK
+	bool "Enable Lwipsack"
+	default y
+
+	help
+	  Answer Y to enable LiteOS support lwip.
+
+choice
+	depends on CONFIG_NET_LWIP_SACK
+	prompt "Lwipsack"
+	default CONFIG_NET_LWIP_SACK_2_1_2
+	help
+	  Enable Lwipsack for 2.x
+
+config CONFIG_NET_LWIP_SACK_2_1_2
+	bool "Enable Lwipsack (2.1.2)"
+	depends on CONFIG_NET_LWIP_SACK
+
+config CONFIG_NET_LWIP_SACK_2_1_3
+	bool "Enable Lwipsack (2.1.3)"
+	depends on CONFIG_NET_LWIP_SACK
+
+endchoice
+
+config CONFIG_NET_LWIP_PPP
+	bool "ppp support"
+	default n
+
+config CONFIG_NET_LWIP_IPV6
+	bool "IPv6 support"
+	default n
+
+config CONFIG_NET_LWIP_BRIDGE
+	bool "Bridge support"
+	default n
+
+config CONFIG_NET_LWIP_SLIP
+	bool "SLIP protocol support"
+	default n
+
+config CONFIG_NET_LWIP_6LOWPAN
+	bool "6LoWPAN support"
+	default n
+
+config CONFIG_NET_LWIP_DIS_UDP_CHECKSUM_CHECK
+	bool "Disable udp checksum check"
+	default n
+
+config CONFIG_NET_LWIP_DIS_TCP_CHECKSUM_CHECK
+	bool "Disable tcp checksum check"
+	default n
+
+config CONFIG_NET_LWIP_DIS_IP_CHECKSUM_GEN
+	bool "Disable ip checksum check"
+	default n
+
+config CONFIG_LWIP_TCP_SACK_OUT
+	bool "Enable tcp sack out"
+	default n
+
+config CONFIG_LWIP_TCP_TIMESTAMPS
+	bool "enable tcp timestamps"
+	default n
+
+config CONFIG_NETDEV_BUDGET
+	int "Net device budget"
+	default 300
+	help
+		Net device buget is for net device receive softirq,
+		which every time irq receive max packats nums
+
+config CONFIG_NET_SKB_HEAD_RESERVE
+	bool "enable skb buffer reserve 64 byte int buffer head"
+	default n
+
+config CONFIG_NET_HOTSPOT
+	bool "hotspot"
+	select CONFIG_NET_LWIP_IPV6
+	select BR2_PACKAGE_PREBUILTS_LIBHOTSPOT
+	default n
+	
+menuconfig CONFIG_WIFI_DEBUG
+	bool "Enable wifi debug"
+	default n
+	if CONFIG_WIFI_DEBUG
+		config CONFIG_WIFI_DEV_DEINIT_DEBUG
+			bool "Enable wifi dev deinit debug"
+			default n
+		
+		config CONFIG_WIFI_ADAPTER_CHK_STATUS
+			bool "Enable wifi adapter chk status"
+			default n
+			
+		config CONFIG_WIFI_ADAPTER_RECV_DEBUG
+			bool "Enable wifi adapter recv debug"
+			default n
+			
+		config CONFIG_WIFI_RX_MIRROR_PRIO
+			int "wifi rx miracast/dlna prio"
+			default 15
+			
+		config CONFIG_WIFI_RX_AIR_PRIO
+			int "wifi rx air prio"
+			default 14
+
+		config CONFIG_WIFI_MEMLIST_NUM_RX
+			int "wifi memlist num rx"
+			default 1536
+
+		config CONFIG_WIFI_MEMLIST_NUM_TX
+			int "wifi memlist num tx"
+			default 512
+	endif
+endif
+endmenu

@@ -1,0 +1,188 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f17b967..a83a3e5 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -829,6 +829,16 @@ if (MINGW)
+ 	add_definitions(-DWINVER=0x0601 -D_WIN32_WINNT=0x0601)
+ endif()
+ 
++set(CMAKE_C_FLAGS "-Wno-undef -Wno-unused-function -Wno-unused-parameter -Wno-error=pointer-to-int-cast -Wno-error=int-to-pointer-cast -Wno-error=int-conversion -Wno-error=implicit-fallthrough -Wno-error=empty-body -Wno-error=format -Wno-error=unused-value ${CMAKE_C_FLAGS}")
++set(LWS_WITH_SHARED OFF)
++ # set(LWS_WITH_MBEDTLS ON)
++ # set(LWS_WITHOUT_CLIENT ON)
++set(LWS_WITHOUT_TESTAPPS ON)
++set(LWS_WITHOUT_EXTENSIONS ON)
++set(LWS_WITH_PLUGINS OFF)
++set(LWS_WITH_RANGES ON)
++# this implies no pthreads in the lib
++set(LWS_MAX_SMP 1)
+ if (LWS_SSL_SERVER_WITH_ECDH_CERT)
+ 	set(LWS_SSL_SERVER_WITH_ECDH_CERT 1)
+ endif()
+@@ -894,23 +904,34 @@ CHECK_C_SOURCE_COMPILES(
+ 	" LWS_HAVE_MALLOC_USABLE_SIZE)
+ 
+ CHECK_FUNCTION_EXISTS(fork LWS_HAVE_FORK)
+-CHECK_FUNCTION_EXISTS(getenv LWS_HAVE_GETENV)
+-CHECK_FUNCTION_EXISTS(malloc LWS_HAVE_MALLOC)
+-CHECK_FUNCTION_EXISTS(memset LWS_HAVE_MEMSET)
+-CHECK_FUNCTION_EXISTS(realloc LWS_HAVE_REALLOC)
+-CHECK_FUNCTION_EXISTS(socket LWS_HAVE_SOCKET)
++# CHECK_FUNCTION_EXISTS(getenv LWS_HAVE_GETENV)
++add_definitions(-DLWS_HAVE_GETENV)
++# CHECK_FUNCTION_EXISTS(malloc LWS_HAVE_MALLOC)
++add_definitions(-DLWS_HAVE_MALLOC)
++# CHECK_FUNCTION_EXISTS(memset LWS_HAVE_MEMSET)
++add_definitions(-DLWS_HAVE_MEMSET)
++# CHECK_FUNCTION_EXISTS(realloc LWS_HAVE_REALLOC)
++add_definitions(-DLWS_HAVE_REALLOC)
++# CHECK_FUNCTION_EXISTS(socket LWS_HAVE_SOCKET)
++add_definitions(-DLWS_HAVE_SOCKET)
+ CHECK_FUNCTION_EXISTS(strerror LWS_HAVE_STRERROR)
+ CHECK_FUNCTION_EXISTS(vfork LWS_HAVE_VFORK)
+ CHECK_FUNCTION_EXISTS(execvpe LWS_HAVE_EXECVPE)
+-CHECK_FUNCTION_EXISTS(getifaddrs LWS_HAVE_GETIFADDRS)
+-CHECK_FUNCTION_EXISTS(snprintf LWS_HAVE_SNPRINTF)
+-CHECK_FUNCTION_EXISTS(_snprintf LWS_HAVE__SNPRINTF)
+-CHECK_FUNCTION_EXISTS(_vsnprintf LWS_HAVE__VSNPRINTF)
++# CHECK_FUNCTION_EXISTS(getifaddrs LWS_HAVE_GETIFADDRS)
++add_definitions(-DLWS_HAVE_GETIFADDRS)
++# CHECK_FUNCTION_EXISTS(snprintf LWS_HAVE_SNPRINTF)
++add_definitions(-DLWS_HAVE_SNPRINTF)
++# CHECK_FUNCTION_EXISTS(_snprintf LWS_HAVE__SNPRINTF)
++add_definitions(-DLWS_HAVE__SNPRINTF)
++# CHECK_FUNCTION_EXISTS(_vsnprintf LWS_HAVE__VSNPRINTF)
++add_definitions(-DLWS_HAVE__VSNPRINTF)
+ CHECK_FUNCTION_EXISTS(getloadavg LWS_HAVE_GETLOADAVG)
+-CHECK_FUNCTION_EXISTS(atoll LWS_HAVE_ATOLL)
++# CHECK_FUNCTION_EXISTS(atoll LWS_HAVE_ATOLL)
++add_definitions(-DLWS_HAVE_ATOLL)
+ CHECK_FUNCTION_EXISTS(_atoi64 LWS_HAVE__ATOI64)
+ CHECK_FUNCTION_EXISTS(_stat32i64 LWS_HAVE__STAT32I64)
+-CHECK_FUNCTION_EXISTS(clock_gettime LWS_HAVE_CLOCK_GETTIME)
++# CHECK_FUNCTION_EXISTS(clock_gettime LWS_HAVE_CLOCK_GETTIME)
++add_definitions(-DLWS_HAVE_CLOCK_GETTIME)
+ CHECK_FUNCTION_EXISTS(eventfd_read LWS_HAVE_EVENTFD)
+ 
+ if (NOT LWS_HAVE_GETIFADDRS)
+@@ -921,25 +942,39 @@ if (NOT LWS_HAVE_GETIFADDRS)
+ endif()
+ 
+ CHECK_INCLUDE_FILE(dlfcn.h LWS_HAVE_DLFCN_H)
+-CHECK_INCLUDE_FILE(fcntl.h LWS_HAVE_FCNTL_H)
++# CHECK_INCLUDE_FILE(fcntl.h LWS_HAVE_FCNTL_H)
++add_definitions(-DLWS_HAVE_FCNTL_H)
+ CHECK_INCLUDE_FILE(in6addr.h LWS_HAVE_IN6ADDR_H)
+-CHECK_INCLUDE_FILE(memory.h LWS_HAVE_MEMORY_H)
+-CHECK_INCLUDE_FILE(netinet/in.h LWS_HAVE_NETINET_IN_H)
+-CHECK_INCLUDE_FILE(stdint.h LWS_HAVE_STDINT_H)
+-CHECK_INCLUDE_FILE(stdlib.h LWS_HAVE_STDLIB_H)
+-CHECK_INCLUDE_FILE(strings.h LWS_HAVE_STRINGS_H)
+-CHECK_INCLUDE_FILE(string.h LWS_HAVE_STRING_H)
++# CHECK_INCLUDE_FILE(memory.h LWS_HAVE_MEMORY_H)
++add_definitions(-DLWS_HAVE_MEMORY_H)
++# CHECK_INCLUDE_FILE(netinet/in.h LWS_HAVE_NETINET_IN_H)
++add_definitions(-DLWS_HAVE_NETINET_IN_H)
++# CHECK_INCLUDE_FILE(stdint.h LWS_HAVE_STDINT_H)
++add_definitions(-DLWS_HAVE_STDINT_H)
++# CHECK_INCLUDE_FILE(stdlib.h LWS_HAVE_STDLIB_H)
++add_definitions(-DLWS_HAVE_STDLIB_H)
++# CHECK_INCLUDE_FILE(strings.h LWS_HAVE_STRINGS_H)
++add_definitions(-DLWS_HAVE_STRINGS_H)
++# CHECK_INCLUDE_FILE(string.h LWS_HAVE_STRING_H)
++add_definitions(-DLWS_HAVE_STRING_H)
+ CHECK_INCLUDE_FILE(sys/prctl.h LWS_HAVE_SYS_PRCTL_H)
+-CHECK_INCLUDE_FILE(sys/socket.h LWS_HAVE_SYS_SOCKET_H)
++# CHECK_INCLUDE_FILE(sys/socket.h LWS_HAVE_SYS_SOCKET_H)
++add_definitions(-DLWS_HAVE_SYS_SOCKET_H)
+ CHECK_INCLUDE_FILE(sys/sockio.h LWS_HAVE_SYS_SOCKIO_H)
+-CHECK_INCLUDE_FILE(sys/stat.h LWS_HAVE_SYS_STAT_H)
+-CHECK_INCLUDE_FILE(sys/types.h LWS_HAVE_SYS_TYPES_H)
+-CHECK_INCLUDE_FILE(unistd.h LWS_HAVE_UNISTD_H)
++# CHECK_INCLUDE_FILE(sys/stat.h LWS_HAVE_SYS_STAT_H)
++add_definitions(-DLWS_HAVE_SYS_STAT_H)
++# CHECK_INCLUDE_FILE(sys/types.h LWS_HAVE_SYS_TYPES_H)
++add_definitions(-DLWS_HAVE_SYS_TYPES_H)
++# CHECK_INCLUDE_FILE(unistd.h LWS_HAVE_UNISTD_H)
++add_definitions(-DLWS_HAVE_UNISTD_H)
+ CHECK_INCLUDE_FILE(vfork.h LWS_HAVE_VFORK_H)
+ CHECK_INCLUDE_FILE(sys/capability.h LWS_HAVE_SYS_CAPABILITY_H)
+-CHECK_INCLUDE_FILE(malloc.h LWS_HAVE_MALLOC_H)
+-CHECK_INCLUDE_FILE(pthread.h LWS_HAVE_PTHREAD_H)
+-CHECK_INCLUDE_FILE(inttypes.h LWS_HAVE_INTTYPES_H)
++# CHECK_INCLUDE_FILE(malloc.h LWS_HAVE_MALLOC_H)
++add_definitions(-DLWS_HAVE_MALLOC_H)
++# CHECK_INCLUDE_FILE(pthread.h LWS_HAVE_PTHREAD_H)
++add_definitions(-DLWS_HAVE_PTHREAD_H)
++# CHECK_INCLUDE_FILE(inttypes.h LWS_HAVE_INTTYPES_H)
++add_definitions(-DLWS_HAVE_INTTYPES_H)
+ 
+ CHECK_LIBRARY_EXISTS(cap cap_set_flag "" LWS_HAVE_LIBCAP)
+ 
+@@ -1009,6 +1044,7 @@ if (LWS_WITH_ZLIB AND NOT LWS_WITH_BUNDLED_ZLIB)
+ 		CHECK_INCLUDE_FILE(zlib.h LWS_HAVE_ZLIB_H)
+ 	endif()
+ endif()
++add_definitions(-DLWS_HAVE_ZLIB_H)
+ 
+ # TODO: These can also be tested to see whether they actually work...
+ set(LWS_HAVE_WORKING_FORK LWS_HAVE_FORK)
+diff --git a/cmake/lws_config_private.h.in b/cmake/lws_config_private.h.in
+index b0615b5..0933560 100644
+--- a/cmake/lws_config_private.h.in
++++ b/cmake/lws_config_private.h.in
+@@ -104,12 +104,6 @@
+    */
+ #undef LT_OBJDIR // We're not using libtool
+ 
+-/* Define to rpl_malloc if the replacement function should be used. */
+-#cmakedefine malloc
+-
+-/* Define to rpl_realloc if the replacement function should be used. */
+-#cmakedefine realloc
+-
+ /* Define to 1 if we have getifaddrs */
+ #cmakedefine LWS_HAVE_GETIFADDRS
+ 
+diff --git a/lib/plat/unix/private-lib-plat-unix.h b/lib/plat/unix/private-lib-plat-unix.h
+index e3262f0..fab172c 100644
+--- a/lib/plat/unix/private-lib-plat-unix.h
++++ b/lib/plat/unix/private-lib-plat-unix.h
+@@ -122,7 +122,7 @@
+ #endif
+ 
+ #else
+-#include <sys/syslog.h>
++//#include <sys/syslog.h>
+ #endif
+ 
+ #ifdef __QNX__
+diff --git a/lib/plat/unix/unix-misc.c b/lib/plat/unix/unix-misc.c
+index a172fff..473a4b6 100644
+--- a/lib/plat/unix/unix-misc.c
++++ b/lib/plat/unix/unix-misc.c
+@@ -61,23 +61,7 @@ lws_get_random(struct lws_context *context, void *buf, size_t len)
+ 
+ void lwsl_emit_syslog(int level, const char *line)
+ {
+-	int syslog_level = LOG_DEBUG;
+-
+-	switch (level) {
+-	case LLL_ERR:
+-		syslog_level = LOG_ERR;
+-		break;
+-	case LLL_WARN:
+-		syslog_level = LOG_WARNING;
+-		break;
+-	case LLL_NOTICE:
+-		syslog_level = LOG_NOTICE;
+-		break;
+-	case LLL_INFO:
+-		syslog_level = LOG_INFO;
+-		break;
+-	}
+-	syslog(syslog_level, "%s", line);
++	lwsl_emit_stderr(level, line);
+ }
+ 
+ 

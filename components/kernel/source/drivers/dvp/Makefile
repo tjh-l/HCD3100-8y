@@ -1,0 +1,9 @@
+dvp_driver-y = dvp_i2c.o
+obj-y += dvp_driver.o
+obj-$(CONFIG_DVP_RN6752V1) += rn6752v1/
+obj-$(CONFIG_DVP_RN6752) += rn6752/
+obj-$(CONFIG_DVP_BF3A03) += bf3a03/
+obj-$(CONFIG_DVP_GC0328) += gc0328/
+obj-$(CONFIG_DVP_MS7200) += ms7200/
+obj-$(CONFIG_DVP_TP2804) += tp2804/
+obj-$(CONFIG_DVP_GC0308) += gc0308/

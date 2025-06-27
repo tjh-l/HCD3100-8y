@@ -1,0 +1,1 @@
+obj-$(CONFIG_HC_AT8563) += AT8563/

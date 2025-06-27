@@ -1,0 +1,48 @@
+menuconfig BR2_PACKAGE_FFMPEG_PLUGINS_PROTOCOLS
+	bool "ffmpeg protocol plugins"
+	default y
+
+if BR2_PACKAGE_FFMPEG_PLUGINS_PROTOCOLS
+
+config BR2_PACKAGE_FFMPEG_PROTOCOL_FILE
+	bool "file protocol"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PROTOCOL_HTTP
+	bool "http protocol"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PROTOCOL_HTTPS
+	bool "https protocol"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PROTOCOL_HTTPPROXY
+	bool "httpproxy protocol"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PROTOCOL_FTP
+	bool "ftp protocol"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PROTOCOL_TCP
+	bool "tcp protocol"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PROTOCOL_UDP
+	bool "udp protocol"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PROTOCOL_RTP
+	bool "rtp protocol"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PROTOCOL_RTMP
+	bool "rtmp protocol"
+	default n
+
+config BR2_PACKAGE_FFMPEG_PROTOCOL_RTMPT
+	bool "rtmpt protocol"
+	default n
+
+endif
+

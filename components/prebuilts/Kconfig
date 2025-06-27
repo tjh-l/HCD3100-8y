@@ -1,0 +1,655 @@
+menuconfig BR2_PACKAGE_PREBUILTS
+	bool "prebuilts"
+	default y
+
+if BR2_PACKAGE_PREBUILTS
+
+config BR2_PACKAGE_PREBUILTS_SWISP
+	bool "sw isp"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_SWTWILL
+	bool "sw twill"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_FFPLAYER
+	bool "ffplayer"
+	select BR2_PACKAGE_FFMPEG
+	select BR2_PACKAGE_PTHREAD
+	select BR2_PACKAGE_PREBUILTS_AUDDRIVER
+
+comment "Error!!! DO NOT select both hctinyplayer and ffplayer!!!"
+	depends on BR2_PACKAGE_HCTINYPLAYER_REGISTRY && BR2_PACKAGE_PREBUILTS_FFPLAYER
+
+config BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	bool "audio driver"
+	select CONFIG_SOUND
+	select CONFIG_AVSYNC_SUPPORT
+	select BR2_PACKAGE_PREBUILTS_SOUNDTOUCH
+	default y
+
+config BR2_PACKAGE_PREBUILTS_VIDDRIVER
+	bool "video driver"
+	select CONFIG_AVSYNC_SUPPORT
+	default y
+
+
+menuconfig BR2_PACKAGE_PREBUILTS_PLUGINS
+	bool "decoder & driver plugins"
+	default n
+
+if BR2_PACKAGE_PREBUILTS_PLUGINS
+
+config BR2_PACKAGE_PREBUILTS_SOUNDTOUCH
+	bool "libsoundtouch"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_MP3DEC
+	bool "mp3 dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_AACDEC
+	bool "aac dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_AACELDEC
+	bool "aacel dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default n
+
+config BR2_PACKAGE_PREBUILTS_AC3DEC
+	bool "ac3 dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_EAC3DEC
+	bool "eac3 dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default n
+
+config BR2_PACKAGE_PREBUILTS_PCMDEC
+	bool "pcm dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_FLACDEC
+	bool "flac dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_VORBISDEC
+	bool "vorbis dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_WMADEC
+	bool "wma dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_WMAPRODEC
+	bool "wmapro/xma1/xma2 dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_OPUSDEC
+	bool "opus dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_RADEC
+	bool "cook dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_APEDEC
+	bool "ape dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_AMRDEC
+	bool "amr dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_PCMDVDDEC
+	bool "pcmdvd dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default n
+
+config BR2_PACKAGE_PREBUILTS_ALACDEC
+	bool "alac dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default n
+
+config BR2_PACKAGE_PREBUILTS_DCADEC
+	bool "dca dec"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default n
+
+config BR2_PACKAGE_PREBUILTS_DCAPARSER
+	bool "dca parser"
+	depends on BR2_PACKAGE_PREBUILTS_AUDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_MPEG2DEC
+	bool "mpeg2 dec"
+	depends on BR2_PACKAGE_PREBUILTS_VIDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_IMAGEDEC
+	bool "image dec"
+	depends on BR2_PACKAGE_PREBUILTS_VIDDRIVER
+	default y if CONFIG_PREBUILT_SUBDIR = ""
+
+config BR2_PACKAGE_PREBUILTS_H264DEC
+	bool "h264 dec"
+	depends on BR2_PACKAGE_PREBUILTS_VIDDRIVER
+	default y if CONFIG_PREBUILT_SUBDIR = ""
+
+if CONFIG_PREBUILT_SUBDIR = ""
+
+config BR2_PACKAGE_PREBUILTS_RVDEC
+	bool "rv dec"
+	depends on BR2_PACKAGE_PREBUILTS_VIDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_VC1DEC
+	bool "vc1 dec"
+	depends on BR2_PACKAGE_PREBUILTS_VIDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_VP8DEC
+	bool "vp8 dec"
+	depends on BR2_PACKAGE_PREBUILTS_VIDDRIVER
+	default y
+
+config BR2_PACKAGE_PREBUILTS_MPEG4DEC
+	bool "mpeg4 dec"
+	depends on BR2_PACKAGE_PREBUILTS_VIDDRIVER
+	default y
+endif
+
+endif
+
+config BR2_PACKAGE_PREBUILTS_HDMIRX
+	bool "hdmi rx driver"
+	depends on BR2_PACKAGE_PREBUILTS_VIDDRIVER
+	default n
+
+
+
+menuconfig BR2_PACKAGE_PREBUILTS_USBDRIVER
+	bool "usb framework driver"
+	select CONFIG_DRV_LNXDRIVER
+	select CONFIG_DRV_SOFTIRQ
+	default n
+
+if BR2_PACKAGE_PREBUILTS_USBDRIVER
+
+	menuconfig BR2_PACKAGE_PREBUILTS_USBDRIVER_HOST
+		bool "usb host"
+		default y
+
+	if BR2_PACKAGE_PREBUILTS_USBDRIVER_HOST
+		config BR2_PACKAGE_PREBUILTS_USBDRIVER_MSC
+		bool "Mass storage"
+		default y
+
+		menuconfig BR2_PACKAGE_PREBUILTS_USBDRIVER_HID
+		bool "HID"
+		default n
+
+		if BR2_PACKAGE_PREBUILTS_USBDRIVER_HID
+			config BR2_PACKAGE_PREBUILTS_USBDRIVER_HID_REDUCED_MODE
+			bool "Disable HID reduced mode"
+			default n
+			help
+				the number of Hichip SOC usb endpoints is limited.
+				If this option IS NOT checked, unnecessary HID interfaces are simply ignored
+				default n
+		endif
+
+		config BR2_PACKAGE_PREBUILTS_USBDRIVER_SERIAL
+		bool "SERIAL (CDC)"
+		default n
+
+		config BR2_PACKAGE_PREBUILTS_USBDRIVER_RNDIS
+		bool "RNDIS (usb network)"
+		default n
+
+		config BR2_PACKAGE_PREBUILTS_USBDRIVER_TTYUSB
+		bool "ttyUSB (CH34x)"
+		default n
+		select BR2_PACKAGE_LIBUSB
+	endif
+
+	menuconfig BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER
+		bool "usb gadget"
+		default n
+
+	if BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER
+
+		config BR2_USBGADGETDRIVER_VID
+			hex "usb device mode VID, defualt as 0xABCD"
+			range 1 0xffff
+			default 0xABCD
+
+		config BR2_USBGADGETDRIVER_PID
+			hex "usb device mode PID, defualt as 0x1234"
+			range 1 0xffff
+			default 0x1234
+
+		menuconfig BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_MSC
+			bool "Mass storage"
+			default y
+			help
+			  The Mass Storage Gadget acts as a USB Mass Storage disk drive.
+			  As its storage repository it can use a regular file or a block
+			  device (in much the same way as the "loop" device driver),
+			  specified as a module parameter or sysfs option.
+
+			if BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_MSC
+
+			choice BR2_USBGADGETDRIVER_USB_MODE
+				prompt "usb device mode "
+				default BR2_USBGADGETDRIVER_USB_MODE_HIGHSPEED
+			config BR2_USBGADGETDRIVER_USB_MODE_HIGHSPEED
+				bool "usb 2.0 / high speed"
+			config BR2_USBGADGETDRIVER_USB_MODE_FULLSPEED
+				bool "usb 1.1 / full speed"
+			endchoice
+
+			config BR2_USBGADGETDRIVER_MSC_BUFLEN
+				int "usb gadget mass-storage buffer size (uint: KB)"
+				depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_MSC
+				range 4 512
+				default 16
+
+			endif ## BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_MSC
+
+
+		config BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_NCM
+			bool "NCM: Network Control Model support"
+			default n
+			help
+			  NCM is an advanced protocol for Ethernet encapsulation, allows
+			  grouping of several ethernet frames into one USB transfer and
+			  different alignment possibilities.
+
+		config BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_SERIAL
+			bool "Serial Gadget (with CDC ACM and CDC OBEX support)"
+			default n
+			help
+			  The Serial Gadget talks to the Linux-USB generic serial driver.
+			  This driver supports a CDC-ACM module option, which can be used
+			  to interoperate with MS-Windows hosts or with the Linux-USB
+
+		config BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_HID
+			select CONFIG_USB_GADGET_HID_VENDOR
+			bool "HID mouse/keyboard"
+			default n
+			help
+			  mouse/keyboard usb gadget driver
+
+		menuconfig BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_HID_TP
+			bool "HID touch panel"
+			default n
+			help
+			  touch panel usb gadget driver
+
+			if BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_HID_TP
+
+			config BR2_USBGADGETDRIVER_HID_TP_WIDTH
+				int "HID : touch panel width (rang: 1 ~ 4096)"
+				range 1 4096
+				default 1920
+
+			config BR2_USBGADGETDRIVER_HID_TP_HEIGHT
+				int "HID : touch panel height (rang: 1 ~ 4096)"
+				range 1 4096
+				default 1200
+
+			endif ## BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_HID_TP
+
+		config BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_IUM
+			bool "IUM USB gadget"
+			default n
+			help
+			  usb ium gadget driver
+
+		config BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_IUM_HID
+			bool "IUM USB gadget (with HID function)"
+			default n
+			help
+			  usb ium gadget driver (with HID funtion)
+
+		menuconfig BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_UVC
+			bool "VIDEO USB gadget (uvc)"
+			default n
+			help
+			  usb video gadget driver (uvc)
+
+			if BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_UVC
+
+			choice BR2_USBGADGETDRIVER_USB_MODE
+				prompt "usb device mode "
+				default BR2_USBGADGETDRIVER_USB_MODE_HIGHSPEED
+			config BR2_USBGADGETDRIVER_USB_MODE_HIGHSPEED
+				bool "usb 2.0 / high speed"
+			config BR2_USBGADGETDRIVER_USB_MODE_FULLSPEED
+				bool "usb 1.1 / full speed"
+			endchoice
+
+			config BR2_USBGADGETDRIVER_UVC_MAXPACKET
+				int "UVC : max packet size (uint: Bytes, rang: 1 ~ 1024)"
+				range 1 1024
+				default 1024
+
+			choice BR2_USBGADGETDRIVER_UVC_EP_ADDRESS_MODE
+				prompt "UAC endpoint init "
+				default BR2_USBGADGETDRIVER_UVC_EP_ADDRESS_MODE_0
+			config BR2_USBGADGETDRIVER_UVC_EP_ADDRESS_MODE_0
+				bool "Control EP init first, Stream EP second"
+			config BR2_USBGADGETDRIVER_UVC_EP_ADDRESS_MODE_1
+				bool "Steram EP init first, Control EP second"
+			endchoice
+			endif ## BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_UVC
+
+
+		menuconfig BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_UAC1
+			bool "AUDIO USB gadget (uac1)"
+			default n
+			help
+			  usb audio gadget driver (uac1)
+
+			if BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_UAC1
+
+			choice BR2_USBGADGETDRIVER_USB_MODE
+				prompt "usb device mode "
+				default BR2_USBGADGETDRIVER_USB_MODE_HIGHSPEED
+			config BR2_USBGADGETDRIVER_USB_MODE_HIGHSPEED
+				bool "usb 2.0 / high speed"
+			config BR2_USBGADGETDRIVER_USB_MODE_FULLSPEED
+				bool "usb 1.1 / full speed"
+			endchoice
+
+			comment "====   Speaker    ===="
+
+			choice BR2_USBGADGETDRIVER_UAC1_SPEAKER_CH
+				prompt "UAC speaker channel"
+				default BR2_USBGADGETDRIVER_UAC1_SPEAKER_STEREO
+			config BR2_USBGADGETDRIVER_UAC1_SPEAKER_DISABLE
+				bool "Disable"
+			config BR2_USBGADGETDRIVER_UAC1_SPEAKER_MONO
+				bool "Mono / 1 channel"
+			config BR2_USBGADGETDRIVER_UAC1_SPEAKER_STEREO
+				bool "Stereo / 2 channels"
+			endchoice
+
+			if !BR2_USBGADGETDRIVER_UAC1_SPEAKER_DISABLE
+			config BR2_USBGADGETDRIVER_UAC1_SPEAKER_SRATE
+				int "UAC speaker sample rate (unit: Hz)"
+				depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_UAC1
+				range 5512 192000
+				default 48000
+
+			choice BR2_USBGADGETDRIVER_UAC1_SPEAKER_BITDEPTH
+				prompt "UAC speaker bitdepth "
+				default BR2_USBGADGETDRIVER_UAC1_SPEAKER_BITDEPTH_16_BITS
+			config BR2_USBGADGETDRIVER_UAC1_SPEAKER_BITDEPTH_8_BITS
+				bool "8 bits"
+			config BR2_USBGADGETDRIVER_UAC1_SPEAKER_BITDEPTH_16_BITS
+				bool "16 bits"
+			config BR2_USBGADGETDRIVER_UAC1_SPEAKER_BITDEPTH_24_BITS
+				bool "24 bits"
+			config BR2_USBGADGETDRIVER_UAC1_SPEAKER_BITDEPTH_32_BITS
+				bool "32 bits"
+			endchoice
+			endif  ##!BR2_USBGADGETDRIVER_UAC1_SPEAKER_DISABLE
+
+			comment "====  Mircophone ===="
+
+			choice BR2_USBGADGETDRIVER_UAC1_MICROPHONE_CH
+				prompt "UAC mircophone channel"
+				default BR2_USBGADGETDRIVER_UAC1_MICROPHONE_STEREO
+			config BR2_USBGADGETDRIVER_UAC1_MICROPHONE_DISABLE
+				bool "Disable"
+			config BR2_USBGADGETDRIVER_UAC1_MICROPHONE_MONO
+				bool "Mono / 1 channel"
+			config BR2_USBGADGETDRIVER_UAC1_MICROPHONE_STEREO
+				bool "Stereo / 2 channels"
+			endchoice
+
+			if !BR2_USBGADGETDRIVER_UAC1_MICROPHONE_DISABLE
+			config BR2_USBGADGETDRIVER_UAC1_MICROPHONE_SRATE
+				int "UAC mircophone sample rate (unit: Hz)"
+				depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_UAC1
+				range 5512 192000
+				default 48000
+
+			choice BR2_USBGADGETDRIVER_UAC1_MICROPHONE_BITDEPTH
+				prompt "UAC mircophone bitdepth "
+				default BR2_USBGADGETDRIVER_UAC1_MICROPHONE_BITDEPTH_16_BITS
+			config BR2_USBGADGETDRIVER_UAC1_MICROPHONE_BITDEPTH_8_BITS
+				bool "8 bits"
+			config BR2_USBGADGETDRIVER_UAC1_MICROPHONE_BITDEPTH_16_BITS
+				bool "16 bits"
+			config BR2_USBGADGETDRIVER_UAC1_MICROPHONE_BITDEPTH_24_BITS
+				bool "24 bits"
+			config BR2_USBGADGETDRIVER_UAC1_MICROPHONE_BITDEPTH_32_BITS
+				bool "32 bits"
+			endchoice
+			endif ## !BR2_USBGADGETDRIVER_UAC1_MICROPHONE_DISABLE
+
+			endif  ## BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_UVC
+
+		config BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_IUM_AUDIO
+			bool "IUM USB gadget (with audio function)"
+			select BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_UAC1
+			select BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_HID_TP
+			default n
+			help
+			  usb ium (with audio function) gadget driver
+
+		config BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_IUM_AUDIO_HID
+			bool "IUM USB gadget (with audio and HID function)"
+			select BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_UAC1
+			select BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_HID_TP
+			default n
+			help
+			  usb ium (with audio function and HID function) gadget driver
+
+		menuconfig BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_WINUSB
+			bool "Winusb wcid gadget driver"
+			default n
+			help
+			  Winusb wcid gadget driver
+
+			if BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_WINUSB
+			config BR2_USBGADGETDRIVER_WINUSB_HOST_OUT_BUF_SZ
+				int "Size of Winusb HOST OUT buffer (unit: KBytes)"
+				range 1 512
+				default 512
+
+			config BR2_USBGADGETDRIVER_WINUSB_HOST_OUT_BUF_CNT
+				int "Number of Winusb HOST OUT buffers"
+				range 1 10
+				default 6
+
+			config BR2_USBGADGETDRIVER_WINUSB_HOST_IN_BUF_SZ
+				int "Size of Winusb HOST IN buffer (unit: KBytes)"
+				range 1 512
+				default 4
+
+			endif ## BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_WINUSB
+
+	endif
+
+endif
+
+
+config BR2_PACKAGE_PREBUILTS_SDMMCDRIVER
+	bool "sd-mmc driver"
+	select CONFIG_DRV_LNXDRIVER
+	select CONFIG_DRV_SOFTIRQ
+	default n
+
+config BR2_PACKAGE_PREBUILTS_NTFS
+	bool "ntfs support"
+	default n
+
+choice
+	prompt "MAC PHY select"
+	default BR2_PACKAGE_PREBUILTS_NOMAC
+
+	config BR2_PACKAGE_PREBUILTS_NOMAC
+		bool "no mac support"
+
+	config BR2_PACKAGE_PREBUILTS_TOE
+		bool "mac support for general"
+		depends on CONFIG_NET
+		select CONFIG_DRV_LNXDRIVER
+		select CONFIG_DRV_SOFTIRQ
+
+	config BR2_PACKAGE_PREBUILTS_TOE2
+		bool "mac support for motorcomm PHY"
+		depends on CONFIG_NET
+		select CONFIG_DRV_LNXDRIVER
+		select CONFIG_DRV_SOFTIRQ
+endchoice
+
+config BR2_PACKAGE_PREBUILTS_LIBSONIC
+	bool "libsonic"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_LIBGE
+	bool "libge"
+	default n
+	select CONFIG_DRV_HCGE
+
+config BR2_PACKAGE_PREBUILTS_LIBDSC
+	bool "libdsc"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_SPECTRUM
+	bool "libspectrum"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_3A
+	bool "lib3a"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_DRC
+	bool "libdrc"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_LIBLRBALANCE
+	bool "liblrbalance"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_LIBEQ6
+	bool "libeq6"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_LIBTWOTONE
+	bool "libtwotone"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_LIBWS2811
+	bool "libws2811"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_LIBEFUSE
+	bool "efuse driver"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_WIFI_LINK_MP_LIBARARY
+	bool "Link wifi MP libary"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_RTL8188FU
+	bool "rtl8188fu"
+	select BR2_PACKAGE_PREBUILTS_WPA_SUPPLICANT
+	default n
+
+config BR2_PACKAGE_PREBUILTS_RTL8188EU
+	bool "rtl8188eu"
+	select BR2_PACKAGE_PREBUILTS_WPA_SUPPLICANT
+	default n
+
+config BR2_PACKAGE_PREBUILTS_RTL8811CU
+	bool "rtl8811cu"
+	select BR2_PACKAGE_PREBUILTS_WPA_SUPPLICANT
+	default n
+
+config BR2_PACKAGE_PREBUILTS_RTL8733BU
+	bool "rtl8731bu"
+	select BR2_PACKAGE_PREBUILTS_WPA_SUPPLICANT
+	default n
+
+config BR2_PACKAGE_PREBUILTS_RTL8822CS
+	bool "rtl8822cs"
+	select BR2_PACKAGE_PREBUILTS_WPA_SUPPLICANT
+	default n
+
+config BR2_PACKAGE_PREBUILTS_RTL8723AS
+	bool "rtl8723as"
+	select BR2_PACKAGE_PREBUILTS_WPA_SUPPLICANT
+	default n
+	
+config BR2_PACKAGE_PREBUILTS_ECR6600U
+	bool "ecr6600u"
+	default n
+	
+comment "Error!!!When select ecr6600u, please de-select wpa_supplicant and other wifi!!!"
+        depends on (BR2_PACKAGE_PREBUILTS_RTL8188FU || \
+                   BR2_PACKAGE_PREBUILTS_RTL8188EU || \
+                   BR2_PACKAGE_PREBUILTS_RTL8811CU || \
+                   BR2_PACKAGE_PREBUILTS_RTL8733BU || \
+                   BR2_PACKAGE_PREBUILTS_RTL8822CS || \
+                   BR2_PACKAGE_PREBUILTS_RTL8822CS || \
+                   BR2_PACKAGE_PREBUILTS_RTL8723AS || \
+                   BR2_PACKAGE_PREBUILTS_RTL8723BS || \
+                   BR2_PACKAGE_PREBUILTS_RTL8733BS) && \
+                   BR2_PACKAGE_PREBUILTS_ECR6600U
+                   
+config BR2_PACKAGE_PREBUILTS_RTL8723BS
+	bool "rtl8723bs"
+	select BR2_PACKAGE_PREBUILTS_WPA_SUPPLICANT
+	default n
+
+config BR2_PACKAGE_PREBUILTS_RTL8733BS
+	bool "rtl8733bs"
+	select BR2_PACKAGE_PREBUILTS_WPA_SUPPLICANT
+	default n
+
+config BR2_PACKAGE_PREBUILTS_WPA_SUPPLICANT
+	bool "wpa_supplicant"
+	select CONFIG_DEV_URANDOM
+	default n
+
+config BR2_PACKAGE_PREBUILTS_WIFI_WIRELESS_TOOLS
+	bool "wireless tools"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_LIBYOUTUBE
+	bool "libiptv-yt"
+	depends on BR2_PACKAGE_WOLFSSL || BR2_PACKAGE_LIBOPENSSL
+	select BR2_PACKAGE_PCRE
+	select BR2_PACKAGE_CJSON
+	select BR2_PACKAGE_LIBCURL
+	select BR2_PACKAGE_HCCAST_IPTV
+	default n
+
+config BR2_PACKAGE_PREBUILTS_LIBHOTSPOT
+	bool "hotspot library"
+	default n
+
+config BR2_PACKAGE_PREBUILTS_LIBHIDALGO
+	bool "libhidalgo"
+	default n
+
+endif

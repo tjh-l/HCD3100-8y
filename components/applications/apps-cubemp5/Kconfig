@@ -1,0 +1,221 @@
+menuconfig BR2_PACKAGE_APPS_CUBEMP5
+	bool "cubemp5"
+	select BR2_PACKAGE_PREBUILTS_LIBGE
+	select BR2_PACKAGE_LIBLVGL
+	select BR2_PACKAGE_PREBUILTS_LIBLRBALANCE
+	select BR2_PACKAGE_PREBUILTS_LIBTWOTONE
+	select BR2_PACKAGE_PREBUILTS_SPECTRUM
+
+if BR2_PACKAGE_APPS_CUBEMP5
+
+config CONFIG_APPS_PROJECTOR_HDMIIN
+	bool "Enable HDMI IN"
+	default y
+	select BR2_PACKAGE_PREBUILTS_HDMIRX	
+
+config CONFIG_APPS_PROJECTOR_CVBSIN
+	bool "Enable CVBS IN"
+	default y
+	select CONFIG_VIDEO_TVDECODER_SUPPORT
+
+config CONFIG_APPS_PROJECTOR_CVBS_TRAINING
+	bool "Enable CVBS training"
+	default n
+	depends on CONFIG_APPS_PROJECTOR_CVBSIN
+	select BR2_PACKAGE_HUDI
+	select BR2_PACKAGE_HUDI_FLASH
+	
+config CONFIG_APPS_PROJECTOR_USBMIRROR
+	bool "Enable USBMirror"
+	default n
+	select CONFIG_NET
+	select BR2_PACKAGE_LIBUSB
+	select BR2_PACKAGE_HCCAST
+	select BR2_PACKAGE_HCCAST_USBMIRROR
+
+config CONFIG_APPS_PROJECTOR_WIRELESSCAST
+	bool "Enable WirelessCast(miracast/dlna/airmirror)"
+	default n
+	select BR2_PACKAGE_HCCAST		
+	select CONFIG_NET
+	select BR2_PACKAGE_CJSON
+	select BR2_PACKAGE_PREBUILTS_LIBDSC
+	#select BR2_PACKAGE_PREBUILTS_RTL8188FU
+	select BR2_PACKAGE_PREBUILTS_WPA_SUPPLICANT
+	select BR2_PACKAGE_PREBUILTS_WIFI_WIRELESS_TOOLS
+	select BR2_PACKAGE_LIBUSB 
+	select BR2_PACKAGE_PREBUILTS_AACELDEC 
+	select BR2_PACKAGE_HCCAST_WIRELESS 
+
+if CONFIG_APPS_PROJECTOR_WIRELESSCAST	
+
+config CONFIG_APPS_PROJECTOR_AIRP2P
+	bool "Enable Airp2p"
+	default n
+	select BR2_PACKAGE_HCCAST_AIRP2P_SUPPORT
+	select BR2_PACKAGE_LIBUSB
+
+endif
+	
+config CONFIG_APPS_PROJECTOR_BLUETOOTH
+	bool "Enable Bluetooth"
+	default n
+	depends on BR2_PACKAGE_BLUETOOTH
+	help
+		open BT according to your board used.
+config CONFIG_APPS_PROJECTOR_VMOTOR_DRIVE
+	bool "Support projector vmotor drive"
+	default n
+	help
+		open step motor drive.
+
+config CONFIG_APPS_PROJECTOR_SPDIF_OUT
+	bool "Support projector spdif out"
+	default n
+	help
+		open spdif out.
+
+config CONFIG_APPS_PROJECTOR_SYS_ZOOM
+	bool "Enable system zoom"
+	default n 
+	help
+		open sys zoom
+
+config CONFIG_APPS_PROJECTOR_USB_AUTO_UPGRADE
+	bool "Enable usb auto upgrade"
+	default n 
+	help
+		open open usb auto upgrade
+
+config CONFIG_APPS_PROJECTOR_MAIN_PAGE
+	bool "Support Main(home) page"
+	default y
+	help
+		open main page.
+
+config CONFIG_APPS_PROJECTOR_CVBS_AUDIO_I2SI_I2SO
+	bool "Support projector cvbs audio i2si i2so"
+	default y
+	help
+		set cvbs audio i2si i2so out.
+		
+config CONFIG_APPS_PROJECTOR_CAST_720P
+	bool "Support 720p cast"
+	default n
+	help
+		720p cast in 64M solution.
+
+config CONFIG_APPS_PROJECTOR_BACKLIGHT_MONITOR
+	bool "support backlight monitor"
+	default n
+	help
+		support backlight monitor.
+
+config CONFIG_APPS_PROJECTOR_KEYSTONE
+	bool "support keystone"
+	default n
+	depends on CONFIG_SOC_HC16XX
+	help
+		support projector keystone function.
+
+config CONFIG_APPS_PROJECTOR_LVGL_RESOLUTION_240P
+    	bool "Support LVGL(osd) resolution for 240P"
+    	default n
+     	help
+        reset LVGL resolution for 320 *240.
+
+config CONFIG_APPS_PROJECTOR_LVGL_MBOX_STANDBY
+	bool "Press POWER 2 times enter standby?"
+	default n
+	help
+		Support confirm when you go in standby
+
+config CONFIG_APPS_PROJECTOR_HCIPTV_YTB
+	bool "Support HCIPTV YTB Function"
+	default n
+	select BR2_PACKAGE_PREBUILTS_LIBYOUTUBE
+	help
+		Support HCIPTV YTB IN PROJECTOR APPS
+
+config CONFIG_APPS_PROJECTOR_MULTI_OS
+	bool "Enable Multi_OS"
+	default n
+
+config CONFIG_AUTO_HTTP_UPGRADE
+	bool "Enable auto http upgrade"
+	default n
+
+config CONFIG_MANUAL_HTTP_UPGRADE
+	bool "Enable manual http upgrade"
+	default n
+
+config CONFIG_HTTP_UPGRADE_URL
+	string "http upgrade url"
+	default "http://172.16.12.81:80"
+
+config CONFIG_APPS_USB_MIRROR_FAST_MODE
+	bool "Support switch to usb mirror playing in main page or other menus"
+	depends on BR2_PACKAGE_HCCAST_USBMIRROR
+	default n
+
+config CONFIG_APPS_IMAGE_DISPLAY_MODE_CHANGE
+	bool "Enable change image display mode(realsize, full,etc) in playbar"
+	default n
+
+config CONFIG_APPS_TRANSCODE_THUMBNIAL_SHOW
+	bool "Enable image tanscode thumbnail showed in media list"
+	default n
+
+config CONFIG_APPS_MEDIA_MEMORY_PLAY
+	bool "Support media memory play"
+	default n
+	help
+		while play the former media again, it would play last position.
+
+config CONFIG_APPS_PROJECTOR_FACTORY_SET
+	bool "Enable HC FACTORY SETTING"
+	default y
+
+config CONFIG_APPS_PROJECTOR_HDMI_SWITCH_SUPPORT
+	bool "support hdmi switch(ms9601a)"
+	default n
+
+menuconfig CONFIG_APPS_PROJECTOR_BATTERY_MONITOR
+	bool "Enable Battery Monitor"
+	default n
+	select CONFIG_I2C_GPIO_MASTER
+
+if CONFIG_APPS_PROJECTOR_BATTERY_MONITOR
+config CONFIG_I2C_GPIO_MASTER
+	bool "I2C GPIO Master"
+	default n
+endif
+
+config CONFIG_APPS_BLUETOOTH_SPEAKER_MODE_SUPPORT
+	bool "Support Bluetooth Speaker Mode Set"
+	default n
+    help
+		Support Bluetooth Speaker Mode Set for Ac6956cgx .
+
+config CONFIG_APPS_LCD_ROTATE
+	bool "Support lcd rotate"
+	default n
+	select CONFIG_DRV_LCD
+	select CONFIG_DRV_LCD_DEV
+	help
+		Support lcd rotate
+
+menuconfig CONFIG_APP_DRC_GAIN
+	bool "Enable DRC Gain"
+	default n
+	select BR2_PACKAGE_PREBUILTS_DRC
+
+if CONFIG_APP_DRC_GAIN
+config CONFIG_APP_DRC_GAIN_LEVEL
+	int "DRC Gain Level 0-30"
+	default "12"
+	help
+		set DRC gain
+endif
+
+endif

@@ -1,0 +1,5 @@
+HCTINYPLAYER_DIR_NAME ?= hctinyplayer_app
+HCTINYPLAYER_SRC += $(wildcard $(CUR_APP_DIR)/$(HCTINYPLAYER_DIR_NAME)/*.c)
+HCTINYPLAYER_SRC += $(shell find -L $(CUR_APP_DIR)/$(HCTINYPLAYER_DIR_NAME)/channel -name "*.c")
+HCTINYPLAYER_SRC += $(wildcard $(CUR_APP_DIR)/$(HCTINYPLAYER_DIR_NAME)/public/*.c)
+HCTINYPLAYER_SRC += $(wildcard $(CUR_APP_DIR)/$(HCTINYPLAYER_DIR_NAME)/volume/*.c)

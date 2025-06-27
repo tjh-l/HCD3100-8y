@@ -1,0 +1,6 @@
+menuconfig BR2_PACKAGE_APPS_BOARDTEST
+	bool "boardtest"
+
+if BR2_PACKAGE_APPS_BOARDTEST
+source "source/Kconfig"
+endif

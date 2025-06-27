@@ -1,0 +1,7 @@
+menuconfig BR2_PACKAGE_APPS_MINIBOOT
+	bool "mini bootloader"
+	default n
+
+if BR2_PACKAGE_APPS_MINIBOOT
+source "source/Kconfig"
+endif

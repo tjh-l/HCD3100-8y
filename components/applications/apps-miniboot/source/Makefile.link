@@ -1,0 +1,15 @@
+LINKER_SCRIPTS := $(srctree)/entry.ld
+ifeq ($(CONFIG_SOC_HC15XX),y)
+LINKER_SCRIPTS += $(TOPDIR)/components/ld/hc15xx/peripherals.ld
+else ifeq ($(CONFIG_SOC_HC16XX),y)
+LINKER_SCRIPTS += $(TOPDIR)/components/ld/hc16xx/peripherals.ld
+endif
+LINKER_SCRIPTS += $(TOPDIR)/components/ld/ldscript.ld
+
+ldflags-$(CONFIG_SOC_HC15XX) += -defsym __mips32r1__=1
+ldflags-$(CONFIG_SOC_HC16XX) += -defsym __mips32r2__=1
+ldflags-y += $(addprefix -T ,$(LINKER_SCRIPTS))
+ldflags-y += --gc-sections
+
+ldlibs-$(BR2_PACKAGE_LIBLZO) += -llzo
+ldlibs-$(BR2_PACKAGE_ZLIB) += -lz

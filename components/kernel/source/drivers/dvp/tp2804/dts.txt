@@ -1,0 +1,37 @@
+gpio-i2c@0 {
+		scl-pinmux = <PINPAD_R05 0>;
+		sda-pinmux = <PINPAD_R04 0>;
+		status = "okay";
+		simulate;
+	};
+
+	dvp-tp2804 {
+		i2c-devpath = "/dev/gpio-i2c0";
+		i2c-addr = <0x44>; //7bit addr		
+		reset-gpio = <PINPAD_T19 GPIO_ACTIVE_LOW>;
+		status = "okay";
+	};
+
+	vindvp {
+		devpath = "/dev/vindvp";
+		dvp-devpath = "/dev/dvp-tp2804";
+		pinmux-dvp = <PINPAD_R09 5 PINPAD_R10 5 PINPAD_R07 5 PINPAD_R08 5 PINPAD_R00 5 PINPAD_R01 5 PINPAD_R02 5 PINPAD_R03 5 PINPAD_R06 5>;
+		
+		/*
+		TVSYS_INVALID = 0,
+		TVSYS_480I = 1,
+		TVSYS_480P = 2 ,
+		TVSYS_576I = 3,
+		TVSYS_576P = 4,
+		TVSYS_720P_50 = 5,
+		TVSYS_720P_60 = 6,
+		TVSYS_1080I_25 = 7,
+		TVSYS_1080I_30 = 8,
+		TVSYS_1080P_24 = 9,
+		TVSYS_1080P_25 = 10,
+		TVSYS_1080P_30 = 11,
+		*/
+		tvsys = <5>;
+		status = "okay";
+	}; 
+	

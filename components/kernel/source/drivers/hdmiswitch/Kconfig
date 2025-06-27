@@ -1,0 +1,10 @@
+if CONFIG_DRV_HDMI_SWITCH
+
+choice
+	prompt "HDMI switch select"
+	
+	config CONFIG_DRV_HDMI_SWITCH_MS9601
+		bool "hdmi switch ms9601a driver"
+
+endchoice
+endif

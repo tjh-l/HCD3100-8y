@@ -1,0 +1,6 @@
+jsonp_callback({
+  "product": "HC15A210",
+  "version": "2305181630",
+  "force_upgrade": true,
+  "url": "http://172.16.12.81:80/hccast/rtos/HC15A210/hcscreen/HCFOTA_HC15A210_2305181630.bin"
+})

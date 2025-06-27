@@ -1,0 +1,6 @@
+menuconfig BR2_PACKAGE_APPS_HCTINYPLAYER
+	bool "hctinyplayer"
+
+if BR2_PACKAGE_APPS_HCTINYPLAYER
+source "source/Kconfig"
+endif

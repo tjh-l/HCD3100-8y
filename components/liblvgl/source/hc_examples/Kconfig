@@ -1,0 +1,23 @@
+config LV_HC_DEMO_APP
+	bool "Enable demo app"
+	default n
+
+if LV_HC_DEMO_APP
+menu "Hichip UI demo"
+	choice
+            prompt "Set the default BIDI direction"
+            default LV_HC_UISLIDE_1280x720
+
+            config LV_HC_UISLIDE_1024x600
+                bool "UISlide of 1024x720 resolution"
+            config LV_HC_UISLIDE_1280x720
+                bool "UISlide of 1280x720 resolution"
+            config LV_HC_METER_1280x720
+                bool "Meter test of 1280x720 resolution"
+        endchoice
+endmenu
+
+config LV_HC_DEMO_AUTO_START
+	bool "Enable demo app auto start"
+	default n
+endif

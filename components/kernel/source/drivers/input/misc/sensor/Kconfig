@@ -1,0 +1,15 @@
+menuconfig CONFIG_SENSOR_GSENSOR
+	bool "gsensor"
+	default n
+
+if CONFIG_SENSOR_GSENSOR
+	source "gsensor/Kconfig"
+endif
+
+menuconfig CONFIG_SENSOR_DSENSOR
+	bool "distance sensor"
+	default n
+
+if CONFIG_SENSOR_DSENSOR
+	source "dsensor/Kconfig"
+endif

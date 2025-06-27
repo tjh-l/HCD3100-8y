@@ -1,0 +1,11 @@
+config CONFIG_DRV_LCD_DEV
+	bool "lcd dev"
+	default n
+
+config CONFIG_DRV_LCD_SC5014A
+	bool "lcd sc5014 support"
+	default n
+
+config CONFIG_DRV_BACKLIGHT
+	bool "backlight support"
+	default n

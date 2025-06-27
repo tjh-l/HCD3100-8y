@@ -1,0 +1,72 @@
+config CONFIG_CMDS_SOUND_I2SO
+	bool "i2s out test"
+	default n
+
+config CONFIG_CMDS_SOUND_AUDSINK
+	bool "audsink test"
+	default n
+
+config CONFIG_CMDS_SOUND_AUDDEC
+	bool "auddec test"
+	default n
+
+config CONFIG_CMDS_SOUND_I2SI
+	bool "i2s in test"
+	default n
+
+config CONFIG_CMDS_SOUND_TDMI
+	bool "tdm in test"
+	default n
+
+config CONFIG_CMDS_SOUND_SPDIFIN
+	bool "spdif in test"
+	default n
+
+config CONFIG_CMDS_SOUND_PDMI
+	bool "PDM in in test"
+	default n
+
+config CONFIG_CMDS_SOUND_PCMI
+	bool "PCM in in test"
+	default n
+
+config CONFIG_CMDS_SOUND_I2SI012
+	bool "i2si-0/1/2 test"
+	default n
+
+config CONFIG_CMDS_SOUND_I2SO_TO_I2SI
+	bool "i2so to i2si test"
+	default n
+
+config CONFIG_CMDS_SOUND_PCMI_TO_PCMO
+	bool "pcmi to pcmo test"
+	default n
+
+config CONFIG_CMDS_SOUND_I2SI_TO_I2SO
+	bool "i2si to i2so test"
+	default n
+
+config CONFIG_CMDS_SOUND_SPECTRUM
+	bool "spectrum test"
+	default n
+
+config CONFIG_CMDS_SOUND_AEC
+	bool "aec test"
+	depends on BR2_PACKAGE_PREBUILTS_3A
+	default n
+
+config CONFIG_CMDS_SOUND_ALAC
+	bool "alac decoder test"
+	default n
+
+config CONFIG_CMDS_SOUND_I2SI_TO_AUDDEC
+	bool "i2si to auddec test"
+	default n
+
+config CONFIG_CMDS_SOUND_AUDDEC
+	bool "auddec test"
+	default n
+
+config CONFIG_CMDS_SOUND_DRC
+	bool "drc test"
+	default n

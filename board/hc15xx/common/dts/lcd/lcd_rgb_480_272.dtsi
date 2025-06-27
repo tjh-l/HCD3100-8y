@@ -1,0 +1,82 @@
+&rgb {
+	rgb-clk-inv = <0>;
+};
+
+&DE {
+	tvtype = <15>;
+	VPInitInfo {
+		rgb-cfg{
+			b-rgb-enable = <1>;
+			/*
+			 * 0: MODE_PRGB
+			 * 1: MODE_SRGB
+			 */
+			rgb-mode = <0>;
+			/*
+			 * 0: MODE_PRGB_888_10bit
+			 * 1: MODE_PRGB_666
+			 */
+			prgb-mode = <0>;
+			lcd-width = <480>;
+			timing-para {
+				/* bool type, 0 or 1*/
+				b-enable = <1>;
+
+				h-display_len = <0>;
+				v-display_len = <0>;
+
+				/*
+				 * VPO_RGB_CLOCK_27M = 1,
+				 * VPO_RGB_CLOCK_33M = 2,
+				 * VPO_RGB_CLOCK_49M = 3,
+				 * VPO_RGB_CLOCK_66M = 4,
+				 * VPO_RGB_CLOCK_74M = 5,
+				 * VPO_RGB_CLOCK_85M = 6,
+				 * VPO_RGB_CLOCK_108M = 7,
+				 * VPO_RGB_CLOCK_6_6M = 8,
+				 * VPO_RGB_CLOCK_9M = 9,
+				 * VPO_RGB_CLOCK_39_6M = 10,
+				 * VPO_RGB_CLOCK_74_25M = 11,
+				 * VPO_RGB_CLOCK_148_5M = 12,
+				 * VPO_RGB_CLOCK_54M = 13,
+				 * VPO_RGB_CLOCK_132M = 14,//H1600
+				 * VPO_RGB_CLOCK_297M = 15,//H1600 only De4k
+				 * VPO_RGB_CLOCK_DPLL = 0xFF,//H1600
+				*/
+				output-clock = <9>;
+
+				h-total-len = <524>;
+				v-total-len = <286>;
+
+				h-active-len = <480>;
+				v-active-len = <272>;
+
+				h-front-len = <11>;
+				h-sync-len = <31>;
+				h-back-len = <2>;
+
+				v-front-len = <2>;
+				v-sync-len = <10>;
+				v-back-len = <2>;
+
+				/* bool type, 0 or 1*/
+				h-sync-level = <0>;
+				/* bool type, 0 or 1*/
+				v-sync-level = <0>;
+
+				/* bool type, 0 or 1*/
+				active-polarity = <1>;
+				frame-rate = <60000>;
+
+				/*
+				31	De_dig_pll_en
+				25:16	DE_DIG_PLL_M_ctrl
+				13:8	DE_DIG_PLL_N_ctrl
+				5:0	DE_DIG_PLL_L_ctrl
+				de_digpll_clock = 24 *(M+1)/((N+1)*(L+1))
+				*/
+				dpll-clock-reg-value = <0x0>;
+			};
+		};
+	};
+};

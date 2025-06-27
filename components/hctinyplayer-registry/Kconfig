@@ -1,0 +1,32 @@
+menuconfig BR2_PACKAGE_HCTINYPLAYER_REGISTRY
+	bool "hctinyplayer registry"
+	default n
+
+comment "Error!!! DO NOT select both hctinyplayer and ffplayer!!!"
+	depends on BR2_PACKAGE_HCTINYPLAYER_REGISTRY && BR2_PACKAGE_PREBUILTS_FFPLAYER
+
+if BR2_PACKAGE_HCTINYPLAYER_REGISTRY
+config BR2_PACKAGE_HCTINYPLAYER_TEST
+	bool "hctinyplayer test cmds"
+	default n
+
+config BR2_PACKAGE_HCTINYPLAYER_PROTOCOL_FILE
+	bool "hctinyplayer protocol file"
+	default y
+
+config BR2_PACKAGE_HCTINYPLAYER_DEMUXER_FLV
+	bool "hctinyplayer demuxer flv"
+	default y
+
+config BR2_PACKAGE_HCTINYPLAYER_DEMUXER_MJPEG
+	bool "hctinyplayer demuxer mjpeg"
+	default y
+
+config BR2_PACKAGE_HCTINYPLAYER_PARSER_MPEGAUDIO
+	bool "hctinyplayer parser mpegaudio"
+	default n
+
+config BR2_PACKAGE_HCTINYPLAYER_PARSER_H264
+	bool "hctinyplayer parser h264"
+	default n
+endif

@@ -1,0 +1,19 @@
+choice
+	prompt "Sorting ES mode"
+        default CONFIG_SORTING_A3200
+
+        config CONFIG_SORTING_A3200 
+		bool "A3200"
+        config CONFIG_SORTING_C3000
+                bool "C3000"
+	config CONFIG_SORTING_C5200
+                bool "C5200"
+        config CONFIG_SORTING_D3000
+                bool "D3000"
+        config CONFIG_SORTING_D5200
+                bool "D5200"
+	config CONFIG_SORTING_C3100
+                bool "C3100"
+	config CONFIG_SORTING_B3100
+                bool "B3100"
+endchoice

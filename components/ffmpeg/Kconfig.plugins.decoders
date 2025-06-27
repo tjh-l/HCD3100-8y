@@ -1,0 +1,262 @@
+menuconfig BR2_PACKAGE_FFMPEG_PLUGINS_DECODERS
+	bool "ffmpeg decoder plugins"
+	default y
+
+if BR2_PACKAGE_FFMPEG_PLUGINS_DECODERS
+
+config BR2_PACKAGE_FFMPEG_DECODER_AAC
+	bool "aac decoder"
+	select BR2_PACKAGE_FFMPEG_PARSER_AAC
+	select BR2_PACKAGE_FFMPEG_DEMUXER_AAC
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_AAC_LATM
+	bool "aac latm decoder"
+	select BR2_PACKAGE_FFMPEG_PARSER_AAC_LATM
+	select BR2_PACKAGE_FFMPEG_DEMUXER_AAC
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_PCM_BLURAY
+	bool "pcm_bluray decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_PCM
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_PCM_DVD
+	bool "pcm_dvd decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_PCM
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_APE
+	bool "ape decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_APE
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_DD
+	bool "dd decoder"
+	select BR2_PACKAGE_FFMPEG_PARSER_AC3
+	select BR2_PACKAGE_FFMPEG_DEMUXER_AC3
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_DDP
+	bool "ddp decoder"
+	select BR2_PACKAGE_FFMPEG_PARSER_AC3
+	select BR2_PACKAGE_FFMPEG_DEMUXER_EAC3
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DECODER_ADPCM
+	bool "adpcm decoder"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DECODER_WAVPACK
+	bool "wavpack decoder"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DECODER_AMR
+	bool "amr decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_AMR
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DECODER_SPEEX
+	bool "speex decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_OGG 
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_GSM
+	bool "gsm/gsm_ms decoder"
+	select BR2_PACKAGE_FFMPEG_PARSER_GSM
+	select BR2_PACKAGE_FFMPEG_DEMUXER_GSM 
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_ALAC
+	bool "alac decoder"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_SIPR
+	bool "sipr decoder"
+	select BR2_PACKAGE_FFMPEG_PARSER_SIPR
+	select BR2_PACKAGE_FFMPEG_DEMUXER_AA 
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_G729
+	bool "g729 decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_ACT
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_QCELP
+	bool "qcelp decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_QCP
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DECODER_RALF
+	bool "ralf decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_RM
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DECODER_TAK
+	bool "tak decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_TAK
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_TTA
+	bool "tta decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_TTA
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_MACE
+	bool "mace3/mace6 decoder"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_MPC
+	bool "mpc7/mpc8 decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_MPC
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_WMAVOICE
+	bool "wmavoice decoder"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_WMALOSSLESS
+	bool "wmalossless decoder"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_QDMC
+	bool "qdmc decoder"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_DSD
+	bool "dsd decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_DSF
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_NELLYMOSER
+	bool "nellymoser decoder"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_MJPG
+	bool "mjpg decoder"	
+	select BR2_PACKAGE_FFMPEG_DEMUXER_IMAGE2
+	select BR2_PACKAGE_FFMPEG_DEMUXER_JPG
+	select BR2_PACKAGE_FFMPEG_PARSER_MJPEG
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_PNG
+	bool "png decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_IMAGE2
+	select BR2_PACKAGE_FFMPEG_DEMUXER_PNG
+	select BR2_PACKAGE_FFMPEG_PARSER_PNG
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_GIF
+	bool "gif decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_IMAGE2
+	select BR2_PACKAGE_FFMPEG_DEMUXER_GIF
+	select BR2_PACKAGE_FFMPEG_PARSER_GIF
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_BMP
+	bool "bmp decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_IMAGE2
+	select BR2_PACKAGE_FFMPEG_DEMUXER_BMP
+	select BR2_PACKAGE_FFMPEG_PARSER_BMP
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_TIFF
+	bool "tiff decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_IMAGE2
+	select BR2_PACKAGE_FFMPEG_DEMUXER_TIFF
+	select BR2_PACKAGE_FFMPEG_PARSER_TIFF
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_TARGA
+	bool "targa decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_IMAGE2
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_WEBP
+	bool "webp decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_IMAGE2
+	select BR2_PACKAGE_FFMPEG_DEMUXER_WEBP
+	select BR2_PACKAGE_FFMPEG_PARSER_WEBP
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_ASS
+	bool "ass decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_ASS	
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_SSA
+	bool "ssa decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_ASS	
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_DVDSUB
+	bool "dvdsub decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_VOBSUB	
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_MICRODVD
+	bool "microdvd decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_MICRODVD
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_SAMI
+	bool "sami decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_SAMI
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_MPL2
+	bool "mpl2 decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_MPL2
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_SRT
+	bool "subrip/srt decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_SRT
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_WEBVTT
+	bool "webvtt decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_WEBVTT
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_TEXT
+	bool "text decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_LRC
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_PGSSUB
+	bool "pgssub decoder"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_DVBSUB
+	bool "dvbsub decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_DVBSUB
+	select BR2_PACKAGE_FFMPEG_PARSER_DVBSUB
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_MOVTEXT
+	bool "movtext decoder"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_VPLAYER
+	bool "vplayer decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_VPLAYER
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_STL
+	bool "stl decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_STL	
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_PJS
+	bool "pjs decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_PJS		
+	default n
+
+config BR2_PACKAGE_FFMPEG_DECODER_SUBVIEWER1
+	bool "subviewer1 decoder"
+	select BR2_PACKAGE_FFMPEG_DEMUXER_SUBVIEWER1
+	default n
+
+endif
+

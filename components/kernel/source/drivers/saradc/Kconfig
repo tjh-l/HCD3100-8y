@@ -1,0 +1,35 @@
+config CONFIG_KEY_ADC
+	bool "key adc driver"
+	select BR2_PACKAGE_PREBUILTS_LIBEFUSE
+	default n
+
+config CONFIG_POLL_ADC
+	bool "poll adc driver"
+	select BR2_PACKAGE_PREBUILTS_LIBEFUSE
+	default n
+
+config CONFIG_TOUCH_ADC
+	bool "touch adc driver 16xx"
+	default n
+
+config CONFIG_KEY_ADC_SAVE_CALIBRATION_TO_OTP
+	select BR2_PACKAGE_HUDI
+	select BR2_PACKAGE_HUDI_FLASH
+	select BR2_PACKAGE_PTHREAD
+	bool "save adc calibration to flash otp area"
+	default n
+
+if CONFIG_KEY_ADC_SAVE_CALIBRATION_TO_OTP
+
+choice
+	prompt "select adc calibration save storage type"
+	default CONFIG_KEY_ADC_SAVE_STORAGE_NOR_OTP
+
+	config CONFIG_KEY_ADC_SAVE_STORAGE_NOR_OTP
+		bool "nor flash otp"
+
+	config CONFIG_KEY_ADC_SAVE_STORAGE_NAND_OTP
+		bool "nand flash otp"
+endchoice
+
+endif

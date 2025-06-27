@@ -1,0 +1,31 @@
+config CONFIG_HC_XPT2046
+	bool "xpt2046"
+	default n
+
+config CONFIG_HC_HY46XX
+	bool "hy46xx"
+	default n
+
+config CONFIG_HC_ILITEK
+	bool "ilitek"
+	default n
+
+config CONFIG_HC_GT911
+	bool "gt911"
+	default n
+
+config CONFIG_HC_BLT1680
+	bool "blt1680"
+	default n
+
+config CONFIG_HC_SIS9509
+	bool "sis9509"
+	default n
+
+config CONFIG_HC_FT5426
+	bool "ft5426"
+	default n
+
+config CONFIG_HC_HYNITRON_CST8XXX
+	bool "hynitron cst8xxx"
+	default n

@@ -1,0 +1,3 @@
+config BR2_PACKAGE_LIBSWTWILL
+	bool "lib sw twill"
+	default n

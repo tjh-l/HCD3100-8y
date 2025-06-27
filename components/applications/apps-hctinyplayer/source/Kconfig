@@ -1,0 +1,3 @@
+if BR2_PACKAGE_APPS_TINYPLAYER
+
+endif

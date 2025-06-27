@@ -1,0 +1,9 @@
+{
+	"FW_VER": "1.0.0",
+	"FW_DATE": "2305192031",
+	"FW_URL": "http://172.16.12.81:80/hccast/rtos/HC15A210/hcusbcast/HCFOTA_HC15A210_2305182031.bin",
+	"APK_VER": "3.0.1",
+	"APK_DATE": "20240219",
+	"APK_URL": "http://119.3.89.190:8080/apk/hccast_3.0.1.apk",
+	"TEST_MODE": "false"
+}

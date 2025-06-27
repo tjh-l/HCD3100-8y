@@ -1,0 +1,113 @@
+config CONFIG_CMDS_FILE_TEST
+	bool "USB file test"
+	default n
+
+config CONFIG_CMDS_LIBUSB_EXAMPLES
+	bool "USB: libusb examples"
+	depends on CONFIG_CMDS_USB
+	depends on BR2_PACKAGE_LIBUSB
+	default n
+
+config CONFIG_CMDS_LIBUVC_EXAMPLES
+	bool "USB: libuvc examples (examples for usb camera driver)"
+	depends on CONFIG_CMDS_USB
+	depends on BR2_PACKAGE_LIBUSB
+	depends on BR2_PACKAGE_LIBUVC
+	default n
+
+config CONFIG_CMDS_LIBUAC_EXAMPLES
+	bool "USB: libuac examples (examples for usb audio UAC driver)"
+	depends on CONFIG_CMDS_USB
+	depends on BR2_PACKAGE_LIBUSB
+	depends on BR2_PACKAGE_LIBUAC
+	default n
+
+config CONFIG_CMDS_USB_EYE_PATTERN
+	bool "USB: Oscilloscope test eye pattern"
+	depends on CONFIG_CMDS_USB
+	default n
+
+config CONFIG_CMDS_USB_HID
+	bool "USB: HID class test demos"
+	depends on BR2_PACKAGE_PREBUILTS_USBDRIVER_HID
+	depends on CONFIG_CMDS_USB
+	default n
+
+config CONFIG_CMDS_USB_4G_RNDIS_NET_DEVICE
+	bool "USB host: support sending AT command to 4G RNDIS network device"
+	depends on BR2_PACKAGE_PREBUILTS_USBDRIVER_SERIAL
+	depends on BR2_PACKAGE_PREBUILTS_USBDRIVER_RNDIS
+	depends on CONFIG_CMDS_USB
+	default n
+
+config CONFIG_CMDS_USB_GADGET_MSC
+	bool "USB gadget: mass-storage device commonds"
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_MSC
+	depends on CONFIG_CMDS_USB
+	default n
+
+config CONFIG_CMDS_USB_GADGET_NCM
+	bool "USB gadget: NCM device commonds"
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_NCM
+	depends on CONFIG_CMDS_USB
+	default n
+
+config CONFIG_CMDS_USB_GADGET_SERIAL
+	bool "USB gadget: Serial device commonds"
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_SERIAL
+	depends on CONFIG_CMDS_USB
+	default n
+
+config CONFIG_CMDS_USB_GADGET_ZERO
+	bool "USB gadget: Zero demo"
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER
+	depends on CONFIG_USB_ZERO
+	depends on CONFIG_CMDS_USB
+	default n
+
+config CONFIG_CMDS_USB_GADGET_HID
+	bool "USB gadget: HID device demo (mouse/keyboard)"
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_HID
+	depends on CONFIG_CMDS_USB
+	default n
+
+config CONFIG_CMDS_USB_GADGET_HID_TP
+	bool "USB gadget: HID device demo (touch panel)"
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_HID_TP
+	depends on CONFIG_CMDS_USB
+	default n
+
+
+config CONFIG_CMDS_USB_GADGET_UAC1
+	bool "USB gadget: UAC1 device commonds"
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_UAC1
+	depends on CONFIG_CMDS_USB
+	default n
+
+config CONFIG_CMDS_USB_GADGET_UVC
+	bool "USB gadget: video device commonds (uvc class)"
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_UVC
+	depends on CONFIG_CMDS_USB
+	default n
+
+config CONFIG_CMDS_USB_GADGET_WINUSB
+	bool "USB gadget: winusb(wcid) commonds"
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_WINUSB
+	depends on CONFIG_CMDS_USB
+	default n
+
+config CONFIG_CMDS_USB_GADGET_LOCK
+	bool "USB gadget: lock demo(uvc + uac)"
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_UVC
+	depends on BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER_UAC1
+	depends on CONFIG_CMDS_USB
+	default n

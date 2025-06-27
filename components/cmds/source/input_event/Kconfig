@@ -1,0 +1,11 @@
+config CONFIG_CMDS_INPUT_POLL_TEST
+	bool "input poll test"
+	default n
+
+config CONFIG_CMDS_INPUT_JOYSTICK_TEST
+	bool "input joystick test"
+	default n
+
+config CONFIG_CMDS_INPUT_IOCTL_TEST
+	bool "input ioctl test"
+	default n

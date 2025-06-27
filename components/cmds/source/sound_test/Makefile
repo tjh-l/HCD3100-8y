@@ -1,0 +1,21 @@
+sound_test-y += sound_test.o wavreader.o
+sound_test-$(CONFIG_CMDS_SOUND_I2SO) += i2so_test.o
+sound_test-$(CONFIG_CMDS_SOUND_I2SI) += i2si_test.o i2si_record.o
+sound_test-$(CONFIG_CMDS_SOUND_TDMI) += tdmi_test.o
+sound_test-$(CONFIG_CMDS_SOUND_SPDIFIN) += spin_test.o
+sound_test-$(CONFIG_CMDS_SOUND_PDMI) += pdmi_test.o
+sound_test-$(CONFIG_CMDS_SOUND_PCMI) += pcmi_test.o
+sound_test-$(CONFIG_CMDS_SOUND_I2SI012) += i2si012_test.o
+sound_test-$(CONFIG_CMDS_SOUND_I2SO_TO_I2SI) += i2si_i2so_recoder_test.o
+sound_test-$(CONFIG_CMDS_SOUND_PCMI_TO_PCMO) += pcm_rec_play.o
+sound_test-$(CONFIG_CMDS_SOUND_I2SI_TO_I2SO) += i2s_rec_play.o
+sound_test-$(CONFIG_CMDS_SOUND_SPECTRUM) += spectrum_test.o
+sound_test-$(CONFIG_CMDS_SOUND_AEC) += aec_test.o aec_main.o
+sound_test-$(CONFIG_CMDS_SOUND_ALAC) += alac_dec.o
+sound_test-$(CONFIG_CMDS_SOUND_I2SI_TO_AUDDEC) += dsp_test.o
+sound_test-$(CONFIG_CMDS_SOUND_AUDDEC) += pcm_dec.o
+sound_test-$(CONFIG_CMDS_SOUND_DRC) += drc_test.o
+sound_test-$(CONFIG_CMDS_SOUND_AUDSINK) += wav_audsink_play.o
+sound_test-$(CONFIG_CMDS_SOUND_AUDDEC) += wav_auddec_play.o
+
+obj-y += sound_test.o

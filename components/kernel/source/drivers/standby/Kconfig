@@ -1,0 +1,82 @@
+menuconfig CONFIG_STANDBY_DDR_SCAN
+	bool "DDR scan test"
+	default n
+if CONFIG_STANDBY_DDR_SCAN
+config CONFIG_STANDBY_REPORT_TO_UART
+	bool "Report result to UART"
+	default n
+if CONFIG_STANDBY_REPORT_TO_UART
+config CONFIG_STANDBY_UART_ID
+	int "Select Uart ID"
+	range 0 3
+	default 0
+endif
+
+config CONFIG_STANDBY_REPORT_TO_REGISTER
+	bool "Report result to Register"
+	default n
+
+config CONFIG_STANDBY_REPORT_TO_SCREEN
+	bool "Report result to Screen"
+	default n
+
+config CONFIG_STANDBY_RESTART_AFTER_TEST
+	bool "Restart after the test is complete"
+	default n
+endif
+
+menuconfig CONFIG_STANDBY_WAKEUP_BY_I2C_DEVICE
+bool "Supports i2c device wake-up"
+default n
+
+if CONFIG_STANDBY_WAKEUP_BY_I2C_DEVICE
+config CONFIG_STANDBY_WAKEUP_BY_I2C_DEVICE1
+	bool "I2C Device Type 1"
+	default n
+endif
+
+choice
+        prompt "Mode"
+        default CONFIG_CLOSE_IP
+
+        config CONFIG_OUT_HC_SCANCODE
+        bool "Output Dubug Info"
+
+        config CONFIG_CLOSE_IP
+        bool "Enable Close IP"
+endchoice
+
+if CONFIG_CLOSE_IP && CONFIG_SOC_HC16XX
+
+config CONFIG_CLOSE_SIDO
+        bool "close sdio"
+        default y
+
+config CONFIG_CLOSE_VDAC
+        bool "close vdac"
+        default y
+
+config CONFIG_CLOSE_LVDS_0
+        bool "close lvds ch0"
+        default y
+
+config CONFIG_CLOSE_LVDS_1
+        bool "close lvds ch1"
+        default y
+
+config CONFIG_CLOSE_MIPI
+        bool "close mipi"
+        default y
+
+config CONFIG_CLOSE_CVBS
+        bool "close cvbs"
+        default y
+
+config CONFIG_CLOSE_HDRX
+        bool "close hdrx"
+        default y
+
+config CONFIG_CLOSE_DDR
+        bool "close ddr"
+        default n
+endif

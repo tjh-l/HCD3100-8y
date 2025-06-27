@@ -1,0 +1,13 @@
+#ifndef _HCUAPI_AIRP2P_H_
+#define _HCUAPI_AIRP2P_H_
+
+#include <hcuapi/iocbase.h>
+
+#define AIRP2P_START			_IO (AIRP2P_IOCBASE, 0x06)
+#define AIRP2P_STOP 			_IO (AIRP2P_IOCBASE, 0x07)
+#define AIRP2P_SET_MASTER 		_IO (AIRP2P_IOCBASE, 0x08)
+#define AIRP2P_CLEAR_MASTER 		_IO (AIRP2P_IOCBASE, 0x09)
+#define AIRP2P_SET_PEER_MAC 		_IO (AIRP2P_IOCBASE, 0x0a)
+#define AIRP2P_CLEAN_PEER_MAC 		_IO (AIRP2P_IOCBASE, 0x0b)
+
+#endif

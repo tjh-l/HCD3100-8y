@@ -1,0 +1,54 @@
+menu "Applications Configuration"
+
+config CONFIG_APPS_NAME
+	string
+	default "avp" if BR2_PACKAGE_APPS_AVP
+	default "hcboot" if BR2_PACKAGE_APPS_BOOTLOADER
+	default "hcboot" if BR2_PACKAGE_APPS_MINIBOOT
+	default "hdmiswitch" if BR2_PACKAGE_APPS_HDMISWITCH
+	default "projector" if BR2_PACKAGE_APPS_PROJECTOR
+	default "hcscreen" if BR2_PACKAGE_APPS_HCSCREEN
+	default "spinandwr" if BR2_PACKAGE_APPS_SPINANDWR
+	default "b2bupdater" if BR2_PACKAGE_APPS_B2BUPDATER
+	default "hcusbcast" if BR2_PACKAGE_APPS_HCUSBCAST
+	default "boardtest" if BR2_PACKAGE_APPS_BOARDTEST
+	default "hcscreenhybrid" if BR2_PACKAGE_APPS_HCSCREENHYBRID
+	default "hctinyplayer" if BR2_PACKAGE_APPS_HCTINYPLAYER
+	default "hcrtosapp"
+	
+config CONFIG_APP_HOSTNAME
+	string "hostname"
+	default "hichip"
+
+config CONFIG_APP_TIMEZONE
+	string "timezone"
+	default "GMT-8"
+
+config CONFIG_APP_LOG_LEVEL
+	int "log level 0-5"
+	default "5"
+
+menu "Application Selection"
+
+comment "Please select only ONE application!"
+comment "Select multi-applications will cause un-expected result!"
+
+source "apps-avp/Kconfig"
+source "apps-bootloader/Kconfig"
+source "apps-miniboot/Kconfig"
+source "apps-hdmiswitch/Kconfig"
+source "apps-projector/Kconfig"
+source "apps-hcscreen/Kconfig"
+source "apps-spinandwr/Kconfig"
+source "apps-b2bupdater/Kconfig"
+source "apps-kidev/Kconfig"
+source "apps-hcusbcast/Kconfig"
+source "apps-xbmp5/Kconfig"
+source "apps-boardtest/Kconfig"
+source "apps-hcscreenhybrid/Kconfig"
+source "apps-cubemp5/Kconfig"
+source "apps-hctinyplayer/Kconfig"
+source "apps-projector-hudi/Kconfig"
+
+endmenu
+endmenu

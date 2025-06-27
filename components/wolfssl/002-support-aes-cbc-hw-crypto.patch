@@ -1,0 +1,963 @@
+diff --git a/src/internal.c b/src/internal.c
+old mode 100644
+new mode 100755
+index 45124fd..23a10d4
+--- a/src/internal.c
++++ b/src/internal.c
+@@ -3079,6 +3079,18 @@ int AllocateSuites(WOLFSSL* ssl)
+     return 0;
+ }
+ 
++static int g_wolfssl_tls13_enable = 0;
++static int g_wolfssl_aesgcm_enable = 0;
++void wolfssl_cstm_tls13_enable(int enable)
++{
++    g_wolfssl_tls13_enable = enable;
++}
++
++void wolfssl_cstm_aesgcm_enable(int enable)
++{
++    g_wolfssl_aesgcm_enable = enable;
++}
++
+ void InitSuites(Suites* suites, ProtocolVersion pv, int keySz, word16 haveRSA,
+                 word16 havePSK, word16 haveDH, word16 haveECDSAsig,
+                 word16 haveECC, word16 haveStaticRSA, word16 haveStaticECC,
+@@ -3127,35 +3139,35 @@ void InitSuites(Suites* suites, ProtocolVersion pv, int keySz, word16 haveRSA,
+ 
+ #ifdef WOLFSSL_TLS13
+ #ifdef BUILD_TLS_AES_128_GCM_SHA256
+-    if (tls1_3) {
++    if (tls1_3 && g_wolfssl_tls13_enable) {
+         suites->suites[idx++] = TLS13_BYTE;
+         suites->suites[idx++] = TLS_AES_128_GCM_SHA256;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_AES_256_GCM_SHA384
+-    if (tls1_3) {
++    if (tls1_3 && g_wolfssl_tls13_enable) {
+         suites->suites[idx++] = TLS13_BYTE;
+         suites->suites[idx++] = TLS_AES_256_GCM_SHA384;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_CHACHA20_POLY1305_SHA256
+-    if (tls1_3) {
++    if (tls1_3 && g_wolfssl_tls13_enable) {
+         suites->suites[idx++] = TLS13_BYTE;
+         suites->suites[idx++] = TLS_CHACHA20_POLY1305_SHA256;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_AES_128_CCM_SHA256
+-    if (tls1_3) {
++    if (tls1_3 && g_wolfssl_tls13_enable) {
+         suites->suites[idx++] = TLS13_BYTE;
+         suites->suites[idx++] = TLS_AES_128_CCM_SHA256;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_AES_128_CCM_8_SHA256
+-    if (tls1_3) {
++    if (tls1_3 && g_wolfssl_tls13_enable) {
+         suites->suites[idx++] = TLS13_BYTE;
+         suites->suites[idx++] = TLS_AES_128_CCM_8_SHA256;
+     }
+@@ -3163,14 +3175,14 @@ void InitSuites(Suites* suites, ProtocolVersion pv, int keySz, word16 haveRSA,
+ 
+ #ifdef HAVE_NULL_CIPHER
+     #ifdef BUILD_TLS_SHA256_SHA256
+-        if (tls1_3 && haveNull) {
++        if (tls1_3 && haveNull && g_wolfssl_tls13_enable) {
+             suites->suites[idx++] = ECC_BYTE;
+             suites->suites[idx++] = TLS_SHA256_SHA256;
+         }
+     #endif
+ 
+     #ifdef BUILD_TLS_SHA384_SHA384
+-        if (tls1_3 && haveNull) {
++        if (tls1_3 && haveNull && g_wolfssl_tls13_enable) {
+             suites->suites[idx++] = ECC_BYTE;
+             suites->suites[idx++] = TLS_SHA384_SHA384;
+         }
+@@ -3213,91 +3225,91 @@ void InitSuites(Suites* suites, ProtocolVersion pv, int keySz, word16 haveRSA,
+ #endif
+ 
+ #ifdef BUILD_TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+-    if (tls1_2 && haveECC) {
++    if (tls1_2 && haveECC && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = ECC_BYTE;
+         suites->suites[idx++] = TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256
+-    if (tls1_2 && haveECC) {
++    if (tls1_2 && haveECC && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = ECC_BYTE;
+         suites->suites[idx++] = TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+-    if (tls1_2 && haveRSA) {
++    if (tls1_2 && haveRSA && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = ECC_BYTE;
+         suites->suites[idx++] = TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+-    if (tls1_2 && haveRSA) {
++    if (tls1_2 && haveRSA && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = ECC_BYTE;
+         suites->suites[idx++] = TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_DHE_RSA_WITH_AES_256_GCM_SHA384
+-    if (tls1_2 && haveDH && haveRSA) {
++    if (tls1_2 && haveDH && haveRSA && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = CIPHER_BYTE;
+         suites->suites[idx++] = TLS_DHE_RSA_WITH_AES_256_GCM_SHA384;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_DHE_RSA_WITH_AES_128_GCM_SHA256
+-    if (tls1_2 && haveDH && haveRSA) {
++    if (tls1_2 && haveDH && haveRSA && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = CIPHER_BYTE;
+         suites->suites[idx++] = TLS_DHE_RSA_WITH_AES_128_GCM_SHA256;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_RSA_WITH_AES_256_GCM_SHA384
+-    if (tls1_2 && haveRSA && haveStaticRSA) {
++    if (tls1_2 && haveRSA && haveStaticRSA && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = CIPHER_BYTE;
+         suites->suites[idx++] = TLS_RSA_WITH_AES_256_GCM_SHA384;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_RSA_WITH_AES_128_GCM_SHA256
+-    if (tls1_2 && haveRSA && haveStaticRSA) {
++    if (tls1_2 && haveRSA && haveStaticRSA && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = CIPHER_BYTE;
+         suites->suites[idx++] = TLS_RSA_WITH_AES_128_GCM_SHA256;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384
+-    if (tls1_2 && haveECC && haveStaticECC) {
++    if (tls1_2 && haveECC && haveStaticECC && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = ECC_BYTE;
+         suites->suites[idx++] = TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256
+-    if (tls1_2 && haveECC && haveStaticECC) {
++    if (tls1_2 && haveECC && haveStaticECC && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = ECC_BYTE;
+         suites->suites[idx++] = TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384
+-    if (tls1_2 && haveRSAsig && haveStaticECC) {
++    if (tls1_2 && haveRSAsig && haveStaticECC && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = ECC_BYTE;
+         suites->suites[idx++] = TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256
+-    if (tls1_2 && haveRSAsig && haveStaticECC) {
++    if (tls1_2 && haveRSAsig && haveStaticECC && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = ECC_BYTE;
+         suites->suites[idx++] = TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_DHE_PSK_WITH_AES_256_GCM_SHA384
+-    if (tls1_2 && haveDH && havePSK) {
++    if (tls1_2 && haveDH && havePSK && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = CIPHER_BYTE;
+         suites->suites[idx++] = TLS_DHE_PSK_WITH_AES_256_GCM_SHA384;
+     }
+@@ -3311,28 +3323,28 @@ void InitSuites(Suites* suites, ProtocolVersion pv, int keySz, word16 haveRSA,
+ #endif
+ 
+ #ifdef BUILD_TLS_DH_anon_WITH_AES_256_GCM_SHA384
+-    if (tls1_2 && haveDH && haveAnon) {
++    if (tls1_2 && haveDH && haveAnon && g_wolfssl_aesgcm_enable) {
+       suites->suites[idx++] = CIPHER_BYTE;
+       suites->suites[idx++] = TLS_DH_anon_WITH_AES_256_GCM_SHA384;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_DHE_PSK_WITH_AES_128_GCM_SHA256
+-    if (tls1_2 && haveDH && havePSK) {
++    if (tls1_2 && haveDH && havePSK && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = CIPHER_BYTE;
+         suites->suites[idx++] = TLS_DHE_PSK_WITH_AES_128_GCM_SHA256;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_PSK_WITH_AES_256_GCM_SHA384
+-    if (tls1_2 && havePSK) {
++    if (tls1_2 && havePSK && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = CIPHER_BYTE;
+         suites->suites[idx++] = TLS_PSK_WITH_AES_256_GCM_SHA384;
+     }
+ #endif
+ 
+ #ifdef BUILD_TLS_PSK_WITH_AES_128_GCM_SHA256
+-    if (tls1_2 && havePSK) {
++    if (tls1_2 && havePSK && g_wolfssl_aesgcm_enable) {
+         suites->suites[idx++] = CIPHER_BYTE;
+         suites->suites[idx++] = TLS_PSK_WITH_AES_128_GCM_SHA256;
+     }
+@@ -3839,9 +3851,9 @@ void InitSuites(Suites* suites, ProtocolVersion pv, int keySz, word16 haveRSA,
+ 
+ #ifdef BUILD_TLS_ECDHE_PSK_WITH_AES_128_GCM_SHA256
+ #ifndef WOLFSSL_OLDTLS_SHA2_CIPHERSUITES
+-    if (tls1_2 && havePSK)
++    if (tls1_2 && havePSK && g_wolfssl_aesgcm_enable)
+ #else
+-    if (tls && havePSK)
++    if (tls && havePSK && g_wolfssl_aesgcm_enable)
+ #endif
+     {
+         suites->suites[idx++] = ECDHE_PSK_BYTE;
+diff --git a/src/ssl_bn.c b/src/ssl_bn.c
+old mode 100644
+new mode 100755
+index 9102a8e..b1cd05e
+--- a/src/ssl_bn.c
++++ b/src/ssl_bn.c
+@@ -2045,7 +2045,7 @@ int wolfSSL_BN_rand(WOLFSSL_BIGNUM* bn, int bits, int top, int bottom)
+ 
+         if (ret == 1) {
+             /* Truncate to requested bit length. */
+-            mp_rshb((mp_int*)bn->internal, 8 - (bits % 8));
++            mp_rshb((mp_int*)bn->internal, (len * 8) - bits);
+         }
+ 
+         /* Set top bit when required. */
+diff --git a/wolfcrypt/src/aes.c b/wolfcrypt/src/aes.c
+old mode 100644
+new mode 100755
+index 8121e2a..09d89bd
+--- a/wolfcrypt/src/aes.c
++++ b/wolfcrypt/src/aes.c
+@@ -84,6 +84,10 @@ block cipher mechanism that uses n-bit binary string parameter key with 128-bits
+     #include <wolfssl/wolfcrypt/port/psa/psa.h>
+ #endif
+ 
++#if defined(WOLFSSL_HCOS)
++    #include <wolfcrypt/src/port/hichip/hc_aes.c>
++#endif
++
+ /* fips wrapper calls, user can call direct */
+ #if defined(HAVE_FIPS) && \
+     (!defined(HAVE_FIPS_VERSION) || (HAVE_FIPS_VERSION < 2))
+@@ -2038,6 +2042,11 @@ static WARN_UNUSED_RESULT int wc_AesEncrypt(
+         #endif
+     }
+ #endif
++
++#if defined(WOLFSSL_HCOS)
++    return hcos_aes_ecb_encrypt(aes, inBlock, outBlock, AES_BLOCK_SIZE);
++#endif
++
+ #if defined(WOLFSSL_SCE) && !defined(WOLFSSL_SCE_NO_AES)
+     AES_ECB_encrypt(aes, inBlock, outBlock, AES_BLOCK_SIZE);
+     return 0;
+@@ -2397,6 +2406,11 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
+         #endif
+     }
+ #endif /* WOLFSSL_AESNI */
++
++#if defined(WOLFSSL_HCOS)
++    return hcos_aes_ecb_decrypt(aes, inBlock, outBlock, AES_BLOCK_SIZE);
++#endif
++
+ #if defined(WOLFSSL_SCE) && !defined(WOLFSSL_SCE_NO_AES)
+     return AES_ECB_decrypt(aes, inBlock, outBlock, AES_BLOCK_SIZE);
+ #endif
+@@ -3093,6 +3107,13 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
+         }
+     #endif
+ 
++    #if defined(WOLFSSL_HCOS)
++        if (keylen > sizeof(aes->devKey)) {
++            return BAD_FUNC_ARG;
++        }
++        XMEMCPY(aes->devKey, userKey, keylen);
++    #endif
++
+         if (checkKeyLen) {
+             if (keylen != 16 && keylen != 24 && keylen != 32) {
+                 return BAD_FUNC_ARG;
+@@ -3175,7 +3196,8 @@ static WARN_UNUSED_RESULT int wc_AesDecrypt(
+         XMEMCPY(rk, userKey, keylen);
+     #if defined(LITTLE_ENDIAN_ORDER) && !defined(WOLFSSL_PIC32MZ_CRYPT) && \
+         (!defined(WOLFSSL_ESP32WROOM32_CRYPT) || \
+-          defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_AES))
++          defined(NO_WOLFSSL_ESP32WROOM32_CRYPT_AES)) && \
++          !defined(WOLFSSL_HCOS)
+         ByteReverseWords(rk, rk, keylen);
+     #endif
+ 
+@@ -4185,6 +4207,9 @@ int wc_AesSetIV(Aes* aes, const byte* iv)
+ #elif defined(WOLFSSL_HAVE_PSA) && !defined(WOLFSSL_PSA_NO_AES)
+     /* implemented in wolfcrypt/src/port/psa/psa_aes.c */
+ 
++#elif defined(WOLFSSL_HCOS)
++    /* implemented in wolfcrypt/src/port/hichip/hc_aes.c */
++
+ #else
+ 
+     /* Software AES - CBC Encrypt */
+@@ -10036,6 +10061,11 @@ static WARN_UNUSED_RESULT int _AesEcbEncrypt(
+         /* fall-through when unavailable */
+     }
+ #endif
++
++#if defined(WOLFSSL_HCOS)
++    return hcos_aes_ecb_encrypt(aes, in, out, sz);
++#endif
++
+ #ifdef WOLFSSL_IMXRT_DCP
+     if (aes->keylen == 16)
+         return DCPAesEcbEncrypt(aes, out, in, sz);
+@@ -10075,6 +10105,11 @@ static WARN_UNUSED_RESULT int _AesEcbDecrypt(
+         /* fall-through when unavailable */
+     }
+ #endif
++
++#if defined(WOLFSSL_HCOS)
++    return hcos_aes_ecb_decrypt(aes, in, out, sz);
++#endif
++
+ #ifdef WOLFSSL_IMXRT_DCP
+     if (aes->keylen == 16)
+         return DCPAesEcbDecrypt(aes, out, in, sz);
+diff --git a/wolfcrypt/src/include.am b/wolfcrypt/src/include.am
+old mode 100644
+new mode 100755
+index 608b935..ec1ecd2
+--- a/wolfcrypt/src/include.am
++++ b/wolfcrypt/src/include.am
+@@ -129,7 +129,8 @@ EXTRA_DIST += wolfcrypt/src/port/ti/ti-aes.c \
+               wolfcrypt/src/port/Renesas/renesas_rx64_hw_sha.c \
+               wolfcrypt/src/port/Renesas/renesas_rx64_hw_util.c \
+               wolfcrypt/src/port/Renesas/README.md \
+-              wolfcrypt/src/port/cypress/psoc6_crypto.c
++              wolfcrypt/src/port/cypress/psoc6_crypto.c \
++              wolfcrypt/src/port/hichip/hc_aes.c
+ 
+ $(ASYNC_FILES):
+ 	$(AM_V_at)touch $(srcdir)/$@
+diff --git a/wolfcrypt/src/port/hichip/hc_aes.c b/wolfcrypt/src/port/hichip/hc_aes.c
+new file mode 100755
+index 0000000..f143733
+--- /dev/null
++++ b/wolfcrypt/src/port/hichip/hc_aes.c
+@@ -0,0 +1,540 @@
++#ifdef HAVE_CONFIG_H
++#include <config.h>
++#endif
++
++#include <wolfssl/wolfcrypt/settings.h>
++
++#ifndef NO_AES
++#ifdef WOLFSSL_HCOS
++
++#include <stdbool.h>
++#include <stdint.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <errno.h>
++#include <string.h>
++#include <unistd.h>
++#include <sys/types.h>
++#include <sys/stat.h>
++#include <sys/ioctl.h>
++#include <fcntl.h>
++#include <stdint.h>
++#include <pthread.h>
++#ifndef HC_RTOS
++#include <sys/mman.h>
++#endif
++#include <hcuapi/dsc.h>
++
++#include <wolfssl/wolfcrypt/aes.h>
++#include <wolfssl/wolfcrypt/error-crypt.h>
++#include <wolfssl/wolfcrypt/port/ti/ti-ccm.h>
++
++typedef enum
++{
++    AES_CTR,
++    AES_CBC,
++} aes_mode_t;
++
++typedef struct
++{
++    int fd;
++    aes_mode_t mode;
++    unsigned char key[16];
++    unsigned char iv[16];
++    struct dsc_algo_params algo_params;
++    int mmap_size;
++    unsigned char* mmap_addr;
++} dsc_ctx_t;
++
++#define BLOCK_SIZE (32 * 1024)
++
++static dsc_ctx_t *g_hcos_dsc_ctx = NULL;
++static pthread_mutex_t g_hcos_dsc_mutex = PTHREAD_MUTEX_INITIALIZER;
++
++static void dump_hex(unsigned char *prefix, unsigned char *data, unsigned int len)
++{
++    int i;
++    
++    printf("%s: ", prefix);
++    for (i = 0; i < len; i ++)
++    {
++        printf("%.2x", data[i]);
++    }
++    printf("\n");
++}
++
++static int hcos_dsc_mmp_init(dsc_ctx_t* dsc_ctx)
++{
++#ifdef HC_RTOS
++    dsc_ctx->mmap_addr = memalign(32, dsc_ctx->mmap_size);
++#else
++    dsc_ctx->mmap_addr = (unsigned char*)mmap(NULL, dsc_ctx->mmap_size, PROT_READ | PROT_WRITE, MAP_SHARED, dsc_ctx->fd, 0);
++#endif
++    if (dsc_ctx->mmap_addr == NULL)
++    {
++        printf("[%s] fd: %d mmap size: %d is fail\n", __func__, dsc_ctx->fd, dsc_ctx->mmap_size);
++    }
++    else
++    {
++        printf("[%s] fd: %d mmap size: %d is ok\n", __func__, dsc_ctx->fd, dsc_ctx->mmap_size);
++    }
++}
++
++static int hcos_dsc_mmp_deinit(dsc_ctx_t* dsc_ctx)
++{
++    if (dsc_ctx->mmap_addr)
++    {
++#ifdef HC_RTOS
++        free(dsc_ctx->mmap_addr);
++#else
++        munmap(dsc_ctx->mmap_addr, dsc_ctx->mmap_size);
++#endif
++        dsc_ctx->mmap_addr = NULL;
++    }
++}
++
++static dsc_ctx_t* hcos_dsc_open(int size)
++{
++    dsc_ctx_t* dsc_ctx = (dsc_ctx_t*)malloc(sizeof(dsc_ctx_t)) ;
++    if (dsc_ctx == NULL)
++    {
++        printf("dsc_ctx malloc fail\n");
++        return NULL;
++    }
++
++    memset(dsc_ctx, 0, sizeof(dsc_ctx_t));
++
++    dsc_ctx->fd = open("/dev/dsc", O_RDWR);
++    if (dsc_ctx->fd < 0)
++    {
++        printf("Open /dev/dsc error, %s\n", strerror(errno));
++        free(dsc_ctx);
++        return NULL;
++    }
++
++    dsc_ctx->mmap_size = size;
++    hcos_dsc_mmp_init(dsc_ctx);
++
++    return dsc_ctx;
++}
++
++
++static void hcos_dsc_close(dsc_ctx_t* dsc_ctx)
++{
++    if (dsc_ctx == NULL)
++        return ;
++    hcos_dsc_mmp_deinit(dsc_ctx);
++    close(dsc_ctx->fd);
++    free(dsc_ctx);
++}
++
++#ifdef HC_RTOS
++static int _hcos_dsc_common_crypt(dsc_ctx_t* dsc_ctx, unsigned char *data,
++                                  unsigned char *output, int size, unsigned long mode)
++{
++    struct dsc_crypt out = {0};
++    unsigned int count_block = ((size + BLOCK_SIZE - 1) / BLOCK_SIZE);
++    int i = 0;
++    int left_len = size;
++    int dec_size = 0;
++    int dec_pos = 0;
++
++    if (((unsigned int)data & 0x1F) || ((unsigned int)output & 0x1F))
++    {
++        for (i = 0; i < count_block; i++)
++        {
++            if (left_len < BLOCK_SIZE)
++            {
++                dec_size = left_len;
++            }
++            else
++            {
++                dec_size = BLOCK_SIZE;
++            }
++
++            out.input = dsc_ctx->mmap_addr;
++            out.size = dec_size;
++            out.output = dsc_ctx->mmap_addr;
++            memcpy(dsc_ctx->mmap_addr, data + dec_pos, dec_size);
++            ioctl(dsc_ctx->fd, mode, &out);
++            memcpy(output + dec_pos, dsc_ctx->mmap_addr, dec_size);
++
++            left_len -= dec_size;
++            dec_pos += dec_size;
++        }
++    }
++    else
++    {
++        vPortCacheFlush(data, size);
++        vPortCacheFlush(output, size);
++        vPortCacheInvalidate(output, size);
++        
++        out.input = data;
++        out.size = size;
++        out.output = output;
++        ioctl(dsc_ctx->fd, mode, &out);
++    }
++
++    return 0;
++}
++#else
++static int _hcos_dsc_common_crypt(dsc_ctx_t* dsc_ctx, unsigned char *data,
++                                  unsigned char *output, int size, unsigned long mode)
++{
++    struct dsc_crypt out = {0};
++    unsigned int count_block = ((size + BLOCK_SIZE - 1) / BLOCK_SIZE);
++    int i = 0;
++    int left_len = size;
++    int dec_size = 0;
++    int dec_pos = 0;
++
++    for (i = 0; i < count_block; i++)
++    {
++        if (left_len < BLOCK_SIZE)
++        {
++            dec_size = left_len;
++        }
++        else
++        {
++            dec_size = BLOCK_SIZE;
++        }
++
++        out.input = dsc_ctx->mmap_addr;
++        out.size = dec_size;
++        out.output = dsc_ctx->mmap_addr;
++        memcpy(dsc_ctx->mmap_addr, data + dec_pos, dec_size);
++        ioctl(dsc_ctx->fd, mode, &out);
++        memcpy(output + dec_pos, dsc_ctx->mmap_addr, dec_size);
++
++        left_len -= dec_size;
++        dec_pos += dec_size;
++    }
++
++    return 0;
++}
++#endif
++
++static int hcos_aes_cbc_decrypt(dsc_ctx_t* dsc_ctx, Aes* aes, unsigned char *input, unsigned char *output, int len)
++{
++    unsigned char cbc_key_hw[64] = { 0 };
++    unsigned char cbc_iv_hw[16] = { 0 };
++
++    if (!dsc_ctx)
++    {
++        printf("dsc_ctx is null\n");
++        return -1;
++    }
++
++    memcpy(cbc_key_hw, aes->devKey, aes->keylen);
++    memcpy(cbc_iv_hw, aes->reg, 16);
++
++    //dump_hex("key", cbc_key_hw, aes->keylen);
++    //dump_hex("iv", cbc_iv_hw, 16);
++    //dump_hex("input", input, len);
++
++    struct dsc_algo_params algo_params_cbc =
++    {
++        .algo_type = DSC_ALGO_AES,
++        .crypto_mode = DSC_ENCRYPT,
++        .chaining_mode = DSC_MODE_CBC,
++        .residue_mode = DSC_RESIDUE_CLEAR,
++        .key = { cbc_key_hw, aes->keylen },
++        .iv = { cbc_iv_hw, 16 },
++    };
++
++    algo_params_cbc.crypto_mode = DSC_DECRYPT;
++
++    if (ioctl(dsc_ctx->fd, DSC_CONFIG, &algo_params_cbc) < 0)
++    {
++        printf("ioctl error, %s\n", strerror(errno));
++        return -1;
++    }
++
++    _hcos_dsc_common_crypt(dsc_ctx, input, output, len, DSC_DO_DECRYPT);
++
++    //dump_hex("output", output, len);
++
++    return 0;
++}
++
++static int hcos_aes_cbc_encrypt(dsc_ctx_t* dsc_ctx, Aes* aes, unsigned char *input, unsigned char *output, int len)
++{
++    unsigned char cbc_key_hw[64] = { 0 };
++    unsigned char cbc_iv_hw[16] = { 0 };
++
++    if (!dsc_ctx)
++    {
++        printf("dsc_ctx is null\n");
++        return -1;
++    }
++
++    memcpy(cbc_key_hw, aes->devKey, aes->keylen);
++    memcpy(cbc_iv_hw, aes->reg, 16);
++
++    //dump_hex("key", cbc_key_hw, aes->keylen);
++    //dump_hex("iv", cbc_iv_hw, 16);
++    //dump_hex("input", input, len);
++
++    struct dsc_algo_params algo_params_cbc =
++    {
++        .algo_type = DSC_ALGO_AES,
++        .crypto_mode = DSC_ENCRYPT,
++        .chaining_mode = DSC_MODE_CBC,
++        .residue_mode = DSC_RESIDUE_CLEAR,
++        .key = { cbc_key_hw, aes->keylen },
++        .iv = { cbc_iv_hw, 16 },
++    };
++
++    if (ioctl(dsc_ctx->fd, DSC_CONFIG, &algo_params_cbc) < 0)
++    {
++        printf("ioctl error, %s\n", strerror(errno));
++        return -1;
++    }
++
++    if (dsc_ctx->mmap_addr == NULL)
++    {
++        printf("[%s]: dsc_ctx->mmap_addr is not init\n", __func__);
++        return -1;
++    }
++
++    if (len > dsc_ctx->mmap_size)
++    {
++        printf("[%s]: decrypt size-%d is bigger than %d \n", __func__, len, dsc_ctx->mmap_size);
++        return -1;
++    }
++
++    _hcos_dsc_common_crypt(dsc_ctx, input, output, len, DSC_DO_ENCRYPT);
++
++    //dump_hex("output", output, len);
++
++    return 0;
++}
++
++static int _hcos_aes_ecb_decrypt(dsc_ctx_t* dsc_ctx, Aes* aes, unsigned char *input, unsigned char *output, int len)
++{
++    unsigned char cbc_key_hw[64] = { 0 };
++
++    if (!dsc_ctx)
++    {
++        printf("dsc_ctx is null\n");
++        return -1;
++    }
++
++    memcpy(cbc_key_hw, aes->devKey, aes->keylen);
++
++    //dump_hex("key", cbc_key_hw, aes->keylen);
++    //dump_hex("input", input, len);
++
++    struct dsc_algo_params algo_params_cbc =
++    {
++        .algo_type = DSC_ALGO_AES,
++        .crypto_mode = DSC_ENCRYPT,
++        .chaining_mode = DSC_MODE_ECB,
++        .residue_mode = DSC_RESIDUE_CLEAR,
++        .key = { cbc_key_hw, aes->keylen },
++        .iv = NULL,
++    };
++
++    algo_params_cbc.crypto_mode = DSC_DECRYPT;
++
++    if (ioctl(dsc_ctx->fd, DSC_CONFIG, &algo_params_cbc) < 0)
++    {
++        printf("ioctl error, %s\n", strerror(errno));
++        return -1;
++    }
++
++    _hcos_dsc_common_crypt(dsc_ctx, input, output, len, DSC_DO_DECRYPT);
++
++    //dump_hex("output", output, len);
++
++    return 0;
++}
++
++static int _hcos_aes_ecb_encrypt(dsc_ctx_t* dsc_ctx, Aes* aes, unsigned char *input, unsigned char *output, int len)
++{
++    unsigned char cbc_key_hw[64] = { 0 };
++
++    if (!dsc_ctx)
++    {
++        printf("dsc_ctx is null\n");
++        return -1;
++    }
++
++    memcpy(cbc_key_hw, aes->devKey, aes->keylen);
++
++    //dump_hex("key", cbc_key_hw, aes->keylen);
++    //dump_hex("input", input, len);
++
++    struct dsc_algo_params algo_params_cbc =
++    {
++        .algo_type = DSC_ALGO_AES,
++        .crypto_mode = DSC_ENCRYPT,
++        .chaining_mode = DSC_MODE_ECB,
++        .residue_mode = DSC_RESIDUE_CLEAR,
++        .key = { cbc_key_hw, aes->keylen },
++        .iv = NULL,
++    };
++
++    if (ioctl(dsc_ctx->fd, DSC_CONFIG, &algo_params_cbc) < 0)
++    {
++        printf("ioctl error, %s\n", strerror(errno));
++        return -1;
++    }
++
++    if (dsc_ctx->mmap_addr == NULL)
++    {
++        printf("[%s]: dsc_ctx->mmap_addr is not init\n", __func__);
++        return -1;
++    }
++
++    if (len > dsc_ctx->mmap_size)
++    {
++        printf("[%s]: decrypt size-%d is bigger than %d \n", __func__, len, dsc_ctx->mmap_size);
++        return -1;
++    }
++
++    _hcos_dsc_common_crypt(dsc_ctx, input, output, len, DSC_DO_ENCRYPT);
++
++    //dump_hex("output", output, len);
++
++    return 0;
++}
++
++WOLFSSL_API int wc_AesCbcEncrypt(Aes* aes, byte* out, const byte* in, word32 sz)
++{
++    int ret = -1;
++
++    if (aes == NULL || out == NULL || in == NULL)
++    {
++        return BAD_FUNC_ARG;
++    }
++
++    if (sz == 0)
++    {
++        return 0;
++    }
++
++    if (sz % AES_BLOCK_SIZE)
++    {
++        printf("AES BAD_LENGTH_E\n");
++        return BAD_LENGTH_E;
++    }
++    
++    pthread_mutex_lock(&g_hcos_dsc_mutex);
++
++    if (!g_hcos_dsc_ctx)
++    {
++        g_hcos_dsc_ctx = hcos_dsc_open(BLOCK_SIZE);
++    }
++
++    if (g_hcos_dsc_ctx)
++    {
++        ret = hcos_aes_cbc_encrypt(g_hcos_dsc_ctx, aes, in, out, sz);
++    }
++
++    pthread_mutex_unlock(&g_hcos_dsc_mutex);
++    
++    return ret;
++}
++
++WOLFSSL_API int  wc_AesCbcDecrypt(Aes* aes, byte* out, const byte* in, word32 sz)
++{
++    int ret = -1;
++
++    if (aes == NULL || out == NULL || in == NULL)
++    {
++        return BAD_FUNC_ARG;
++    }
++
++    if (sz == 0)
++    {
++        return 0;
++    }
++
++    if (sz % AES_BLOCK_SIZE)
++    {
++        printf("AES BAD_LENGTH_E\n");
++        return BAD_LENGTH_E;
++    }
++
++    pthread_mutex_lock(&g_hcos_dsc_mutex);
++
++    if (!g_hcos_dsc_ctx)
++    {
++        g_hcos_dsc_ctx = hcos_dsc_open(BLOCK_SIZE);
++    }
++
++    if (g_hcos_dsc_ctx)
++    {
++        ret = hcos_aes_cbc_decrypt(g_hcos_dsc_ctx, aes, in, out, sz);
++    }
++
++    pthread_mutex_unlock(&g_hcos_dsc_mutex);
++
++    return ret;
++}
++
++int hcos_aes_ecb_encrypt(Aes* aes, const byte* in, byte* out, int sz)
++{
++    int ret = -1;
++
++    if (aes == NULL || out == NULL || in == NULL)
++    {
++        return BAD_FUNC_ARG;
++    }
++
++    if (sz == 0)
++    {
++        return 0;
++    }
++
++    pthread_mutex_lock(&g_hcos_dsc_mutex);
++
++    if (!g_hcos_dsc_ctx)
++    {
++        g_hcos_dsc_ctx = hcos_dsc_open(BLOCK_SIZE);
++    }
++
++    if (g_hcos_dsc_ctx)
++    {
++        ret = _hcos_aes_ecb_encrypt(g_hcos_dsc_ctx, aes, in, out, sz);
++    }
++
++    pthread_mutex_unlock(&g_hcos_dsc_mutex);
++
++    return ret;
++}
++
++int hcos_aes_ecb_decrypt(Aes* aes, const byte* in, byte* out, int sz)
++{
++    int ret = -1;
++
++    if (aes == NULL || out == NULL || in == NULL)
++    {
++        return BAD_FUNC_ARG;
++    }
++
++    if (sz == 0)
++    {
++        return 0;
++    }
++
++    pthread_mutex_lock(&g_hcos_dsc_mutex);
++
++    if (!g_hcos_dsc_ctx)
++    {
++        g_hcos_dsc_ctx = hcos_dsc_open(BLOCK_SIZE);
++    }
++
++    if (g_hcos_dsc_ctx)
++    {
++        ret = _hcos_aes_ecb_decrypt(g_hcos_dsc_ctx, aes, in, out, sz);
++    }
++
++    pthread_mutex_unlock(&g_hcos_dsc_mutex);
++
++    return ret;
++}
++
++#endif
++#endif
+diff --git a/wolfssl/openssl/opensslv.h b/wolfssl/openssl/opensslv.h
+old mode 100644
+new mode 100755
+index 7584273..5799792
+--- a/wolfssl/openssl/opensslv.h
++++ b/wolfssl/openssl/opensslv.h
+@@ -32,15 +32,14 @@
+     defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER == 0x10100000L) ||\
+     defined(OPENSSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER == 0x10001040L)
+      /* valid version */
+-#elif defined(WOLFSSL_APACHE_HTTPD) || defined(HAVE_LIBEST) || \
+-      defined(WOLFSSL_BIND) || defined(WOLFSSL_NGINX) || \
++#elif defined(WOLFSSL_APACHE_HTTPD) || defined(HAVE_LIBEST) || defined(WOLFSSL_NGINX) || \
+       defined(WOLFSSL_RSYSLOG) || defined(WOLFSSL_KRB) || defined(HAVE_STUNNEL)
+     /* For Apache httpd, Use 1.1.0 compatibility */
+      #define OPENSSL_VERSION_NUMBER 0x10100003L
+ #elif defined(WOLFSSL_QT) || defined(WOLFSSL_PYTHON)
+     /* For Qt and Python 3.8.5 compatibility */
+      #define OPENSSL_VERSION_NUMBER 0x10101000L
+-#elif defined(WOLFSSL_HAPROXY) || defined(WOLFSSL_FFMPEG)
++#elif defined(WOLFSSL_HAPROXY) || defined(WOLFSSL_FFMPEG) || defined(WOLFSSL_BIND)
+      #define OPENSSL_VERSION_NUMBER 0x1010000fL
+ #elif defined(OPENSSL_ALL) || defined(HAVE_LIGHTY) || \
+     defined(WOLFSSL_NGINX) || defined(WOLFSSL_OPENSSH) || defined(WOLFSSL_OPENVPN)
+diff --git a/wolfssl/ssl.h b/wolfssl/ssl.h
+old mode 100644
+new mode 100755
+index f1c91aa..3704934
+--- a/wolfssl/ssl.h
++++ b/wolfssl/ssl.h
+@@ -2995,7 +2995,7 @@ WOLFSSL_API int wolfSSL_make_eap_keys(WOLFSSL* ssl, void* key, unsigned int len,
+               !defined(WOLFSSL_PICOTCP) && !defined(WOLFSSL_ROWLEY_ARM) && \
+               !defined(WOLFSSL_EMBOS) && !defined(WOLFSSL_FROSTED) && \
+               !defined(WOLFSSL_CHIBIOS) && !defined(WOLFSSL_CONTIKI) && \
+-              !defined(WOLFSSL_ZEPHYR) && !defined(NETOS) && !defined(WOLFSSL_HCRTOS)
++              !defined(WOLFSSL_ZEPHYR) && !defined(NETOS) && !defined(WOLFSSL_HCOS)
+             #include <sys/uio.h>
+         #endif
+         /* allow writev style writing */
+diff --git a/wolfssl/wolfcrypt/aes.h b/wolfssl/wolfcrypt/aes.h
+old mode 100644
+new mode 100755
+index 90cb8a8..dd7ef34
+--- a/wolfssl/wolfcrypt/aes.h
++++ b/wolfssl/wolfcrypt/aes.h
+@@ -279,7 +279,7 @@ struct Aes {
+ #if defined(WOLF_CRYPTO_CB) || (defined(WOLFSSL_DEVCRYPTO) && \
+     (defined(WOLFSSL_DEVCRYPTO_AES) || defined(WOLFSSL_DEVCRYPTO_CBC))) || \
+     (defined(WOLFSSL_ASYNC_CRYPT) && defined(WC_ASYNC_ENABLE_AES)) || \
+-    defined(WOLFSSL_KCAPI_AES)
++    defined(WOLFSSL_KCAPI_AES) || defined(WOLFSSL_HCOS)
+     word32 devKey[AES_MAX_KEY_SIZE/WOLFSSL_BIT_SIZE/sizeof(word32)]; /* raw key */
+ #ifdef HAVE_CAVIUM_OCTEON_SYNC
+     int    keySet;

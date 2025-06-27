@@ -1,0 +1,99 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+#
+# This is not a complete Makefile of itself.  Instead, it is designed to
+# be easily embeddable into other systems of Makefiles.
+#
+
+FDTDUMP_SRCS = \
+	fdtdump.c \
+	util.c
+
+FDTDUMP_OBJS = $(FDTDUMP_SRCS:%.c=%.o)
+
+
+FDTGET_SRCS = \
+	fdtget.c \
+	util.c
+
+FDTGET_OBJS = $(FDTGET_SRCS:%.c=%.o)
+
+
+FDTPUT_SRCS = \
+	fdtput.c \
+	util.c
+
+FDTPUT_OBJS = $(FDTPUT_SRCS:%.c=%.o)
+
+FDTOVERLAY_SRCS = \
+	fdtoverlay.c \
+	util.c
+
+FDTOVERLAY_OBJS = $(FDTOVERLAY_SRCS:%.c=%.o)
+
+GEN_HCPROGINI_SRCS = \
+	gen_hcprogini.c \
+	util.c \
+	fdt_api.c
+
+GEN_HCPROGINI_OBJS = $(GEN_HCPROGINI_SRCS:%.c=%.o)
+
+GETFDT_SRCS = \
+	getfdt.c \
+	util.c \
+	fdt_api.c
+
+GETFDT_OBJS = $(GETFDT_SRCS:%.c=%.o)
+
+FIXUP_PART_FILENAME_SRCS = \
+	fixup_part_filename.c \
+	util.c \
+	fdt_api.c
+
+FIXUP_PART_FILENAME_OBJS = $(FIXUP_PART_FILENAME_SRCS:%.c=%.o)
+
+GET_PART_FILENAME_SRCS = \
+	get_part_filename.c \
+	util.c \
+	fdt_api.c
+
+GET_PART_FILENAME_OBJS = $(GET_PART_FILENAME_SRCS:%.c=%.o)
+
+GEN_FLASHBIN_SRCS = \
+	gen_flashbin.c \
+	util.c \
+	fdt_api.c
+
+GEN_FLASHBIN_OBJS = $(GEN_FLASHBIN_SRCS:%.c=%.o)
+
+HCFOTA_GENERATOR_SRCS = \
+	HCFota_Generator.c \
+	util.c \
+	fdt_api.c \
+	genimage/genimage.c \
+	$(wildcard ../../../components/kernel/source/lib/crc/crc32.c ../../../SOURCE/avp/components/kernel/source/lib/crc/crc32.c)
+
+HCFOTA_GENERATOR_OBJS = $(HCFOTA_GENERATOR_SRCS:%.c=%.o)
+
+DDRCONFIG_MODIFY_SRCS = \
+	ddrconfig_modify.c \
+	util.c \
+	fdt_api.c
+
+DDRCONFIG_MODIFY_OBJS = $(DDRCONFIG_MODIFY_SRCS:%.c=%.o)
+
+GENPERSISTENTMEM_SRCS = \
+	genpersistentmem.c \
+	util.c \
+	fdt_api.c
+
+GENPERSISTENTMEM_OBJS = $(GENPERSISTENTMEM_SRCS:%.c=%.o)
+
+DBGPERSISTENTMEM_SRCS = \
+	dbgpersistentmem.c
+
+DBGPERSISTENTMEM_OBJS = $(DBGPERSISTENTMEM_SRCS:%.c=%.o)
+
+MKGPT_SRCS = \
+	mkgpt.c
+
+MKGPT_OBJS = $(MKGPT_SRCS:%.c=%.o)

@@ -1,0 +1,32 @@
+#
+# Joystick driver configuration
+#
+menuconfig CONFIG_INPUT_JOYSTICK
+	bool "Joysticks/Gamepads"
+	help
+	  If you have a joystick, 6dof controller, gamepad, steering wheel,
+	  weapon control system or something like that you can say Y here
+	  and the list of supported devices will be displayed. This option
+	  doesn't affect the kernel.
+
+	  Please read the file <file:Documentation/input/joystick.txt> which
+	  contains more information.
+
+if CONFIG_INPUT_JOYSTICK
+
+config CONFIG_JOYSTICK_XPAD
+	tristate "X-Box gamepad support"
+	depends on BR2_PACKAGE_PREBUILTS_USBDRIVER_HID
+	depends on CONFIG_INPUT_JOYDEV
+	help
+	  Say Y here if you want to use the X-Box pad with your computer.
+	  Make sure to say Y to "Joystick support" (CONFIG_INPUT_JOYDEV)
+	  and/or "Event interface support" (CONFIG_INPUT_EVDEV) as well.
+
+	  For information about how to connect the X-Box pad to USB, see
+	  <file:Documentation/input/xpad.txt>.
+
+	  To compile this driver as a module, choose M here: the
+	  module will be called xpad.
+
+endif

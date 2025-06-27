@@ -1,0 +1,3 @@
+config CONFIG_HC_AT8563
+	bool "AT8563 rtc driver"
+	default n

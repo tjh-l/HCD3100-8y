@@ -1,0 +1,10 @@
+config BR2_PACKAGE_WOLFSSL
+	bool "wolfssl"
+	select BR2_PACKAGE_PREBUILTS_LIBDSC
+	help
+	  The wolfSSL embedded SSL library (formerly CyaSSL) is a
+	  lightweight, portable, C-language-based SSL/TLS library
+	  targeted at IoT, embedded, and RTOS environments primarily
+	  because of its size, speed, and feature set.
+
+	  https://www.wolfssl.com/

@@ -1,0 +1,5 @@
+config BR2_PACKAGE_HOTSPOT
+	bool "hotspot"
+	select CONFIG_NET
+	help
+		Bridge wlan to ethernet

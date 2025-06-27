@@ -1,0 +1,132 @@
+source "lvgl/Kconfig"
+
+config  LV_USE_GPU_HICHIP
+    bool "Enable hichip gpu"
+    default y
+
+config LV_HC_SCREEN_HOR_RES
+	int "lvgl horizon resolution"
+	default 1280
+
+config LV_HC_SCREEN_VER_RES
+	int "lvgl vertical resolution"
+	default 720
+
+config LV_HC_DRAW_BUF_SIZE
+	int "lvgl draw buffer size"
+	default 0
+	help
+	lvgl draw buffer size, in pixel, sugest at least 10 * LV_HC_SCREEN_HOR_RES
+	default zero, then it is equal to LV_HC_SCREEN_HOR_RES * LV_HC_SCREEN_VER_RES)
+
+config LV_HC_DRAW_BUF_COUNT
+	int "draw buffer count"
+	default 1
+	range 1 2
+
+config LV_USE_DUAL_FRAMEBUFFER
+	bool "Enable dual framebuffer"
+	default y
+
+source "hc_examples/Kconfig"
+
+choice LV_HC_FB_COLOR_DEPTH
+    prompt "Framebuffer color depth."
+    default LV_HC_FB_COLOR_DEPTH_16_ARGB4444
+    help
+	Framebuffer color depth to be used.
+
+    config LV_HC_FB_COLOR_DEPTH_32
+	bool "32: ARGB8888"
+    config LV_HC_FB_COLOR_DEPTH_16_ARGB1555
+	bool "16: ARGB1555"
+    config LV_HC_FB_COLOR_DEPTH_16_ARGB4444
+	bool "16: ARGB4444"
+endchoice
+
+config LV_HC_FB_COLOR_DEPTH
+    int
+    default 16 if LV_HC_FB_COLOR_DEPTH_16_ARGB4444 || LV_HC_FB_COLOR_DEPTH_16_ARGB1555
+    default 32 if LV_HC_FB_COLOR_DEPTH_32
+
+config LV_HC_DITHER
+    bool "Enable dither"
+    default n
+    help
+        Only for 16bit color depth of framebuffer, A background that is not
+	a gradient will have a frosted feel.
+
+menu "Hichip create font"
+	config SIYUANHEITI_LIGHT_18_1B
+                bool "Enable Chinse SiYuanHeiTi-Lightx 18, Bpp 1b"
+		default n
+	config SIYUANHEITI_LIGHT_22_1B
+                bool "Enable Chinse SiYuanHeiTi-Lightx 22, Bpp 1b"
+		default n
+	config SIYUANHEITI_LIGHT_28_1B
+                bool "Enable Chinse SiYuanHeiTi-Lightx 28, Bpp 1b"
+		default n
+	config SIYUANHEITI_LIGHT_28_2B
+                bool "Enable Chinse SiYuanHeiTi-Lightx 28, Bpp 2b"
+		default n
+	config SIYUANHEITI_LIGHT_28_4B
+                bool "Enable Chinse SiYuanHeiTi-Lightx 28, Bpp 4b"
+		default n
+	config SIYUANHEITI_LIGHT_3000_28_1B
+                bool "Enable Chinse SiYuanHeiTi-Lightx_3000 28, Bpp 1b"
+		default n
+endmenu
+
+config LV_HC_IR
+	bool "Enable IR"
+	default n
+if LV_HC_IR
+config LV_HC_IR_INPUT_DEV
+	string "IR input device path"
+	default "/dev/input/event0"
+endif
+
+
+config LV_HC_KEYSTONE_AA_SW_FIX
+	bool "Enable keystone AA by using fb"
+	default n
+
+config LV_HC_KEYSTONE_AA_SW_FIX_ALWAYS_CHOP_BAD_EDGE
+       bool "Enable keystone AA always chop bad edges"
+       default n
+
+config LV_HC_KEYSTONE_AA_SW_FIX_GC
+       bool "Enable keystone AA gamma correction"
+       default n
+
+config LV_HC_KEYSTONE_AA_SW_FIX_KAF_CMD
+       bool "Enable keystone AA kaf debug command"
+       default n
+
+config LV_HC_MODIFY_EDGE_FOR_DEBUG
+       bool "Enable modifying edge for debug purpose"
+       default n
+
+config LV_HC_KEYSTONE_EQUAL_SCALE
+	bool "Enable keystone equal scale by using fb"
+	default n
+
+config LV_ATTRIBUTE_MEM_ALIGN
+	int "memory align"
+	default 32
+	help
+		Will be added where memories needs to be aligned
+		__attribute__((aligned(4)))
+
+config LV_USE_HC_TP_MONKEY
+    bool "Enable TP Monkey test"
+    select LV_USE_MONKEY
+    default n
+
+config LV_HC_FBDEV_PATH
+    string "Configure framebuffer device"
+    default "/dev/fb0"
+
+config LV_HC_MEM_FROM_MALLOC
+    bool "Enable liblvgl memory from malloc in system, otherwize from framebuffer memory"
+    default n

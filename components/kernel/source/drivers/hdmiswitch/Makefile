@@ -1,0 +1,2 @@
+
+obj-$(CONFIG_DRV_HDMI_SWITCH_MS9601) += ms9601/

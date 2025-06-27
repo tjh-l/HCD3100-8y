@@ -1,0 +1,545 @@
+mainmenu "HCRTOS SDK Menu Configure"
+source "target/Kconfig"
+menu "Mirrors and Download locations"
+config BR2_HAVE_DOT_CONFIG
+	bool
+	default y
+config BR2_PRIMARY_SITE
+	string "Primary download site"
+	default ""
+	help
+	  Primary site to download from. If this option is set then
+	  buildroot will try to download package source first from this
+	  site and try the default if the file is not found.
+	  Valid URIs are:
+	    - URIs recognized by $(WGET)
+	    - local URIs of the form file://absolutepath
+	    - scp URIs of the form scp://[user@]host:path.
+config BR2_PRIMARY_SITE_ONLY
+	bool "Only allow downloads from primary download site"
+	depends on BR2_PRIMARY_SITE != ""
+	help
+	  If this option is enabled, downloads will only be attempted
+	  from the primary download site. Other locations, like the
+	  package's official download location or the backup download
+	  site, will not be considered. Therefore, if the package is not
+	  present on the primary site, the download fails.
+	  This is useful for project developers who want to ensure that
+	  the project can be built even if the upstream tarball
+	  locations disappear.
+if !BR2_PRIMARY_SITE_ONLY
+config BR2_BACKUP_SITE
+	string "Backup download site"
+	default "http://sources.buildroot.net"
+	help
+	  Backup site to download from. If this option is set then
+	  buildroot will fall back to download package sources from here
+	  if the normal location fails.
+config BR2_KERNEL_MIRROR
+	string "Kernel.org mirror"
+	default "https://cdn.kernel.org/pub"
+	help
+	  kernel.org is mirrored on a number of servers around the
+	  world. The following allows you to select your preferred
+	  mirror. By default, a CDN is used, which automatically
+	  redirects to a mirror geographically close to you.
+	  Have a look on the kernel.org site for a list of mirrors, then
+	  enter the URL to the base directory. Examples:
+	     http://www.XX.kernel.org/pub (XX = country code)
+	     http://mirror.aarnet.edu.au/pub/ftp.kernel.org
+config BR2_GNU_MIRROR
+	string "GNU Software mirror"
+	default "http://ftpmirror.gnu.org"
+	help
+	  GNU has multiple software mirrors scattered around the
+	  world. The following allows you to select your preferred
+	  mirror. By default, a generic address is used, which
+	  automatically selects an up-to-date and local mirror.
+	  Have a look on the gnu.org site for a list of mirrors, then
+	  enter the URL to the base directory. Examples:
+	     http://ftp.gnu.org/pub/gnu
+	     http://mirror.aarnet.edu.au/pub/gnu
+config BR2_LUAROCKS_MIRROR
+	string "LuaRocks mirror"
+	default "http://rocks.moonscript.org"
+	help
+	  LuaRocks repository.
+	  See http://luarocks.org
+config BR2_CPAN_MIRROR
+	string "CPAN mirror (Perl packages)"
+	default "http://cpan.metacpan.org"
+	help
+	  CPAN (Comprehensive Perl Archive Network) is a repository of
+	  Perl packages. It has multiple software mirrors scattered
+	  around the world. This option allows you to select a mirror.
+	  The list of mirrors is available at:
+	  http://search.cpan.org/mirror
+endif
+config BR2_GLOBAL_PATCH_DIR
+	string "global patch directories"
+	help
+	  You may specify a space separated list of one or more directories
+	  containing global package patches. For a specific version
+	  <packageversion> of a specific package <packagename>, patches are
+	  applied as follows:
+	  First, the default Buildroot patch set for the package is applied
+	  from the package's directory in Buildroot.
+	  Then for every directory - <global-patch-dir> - that exists in
+	  BR2_GLOBAL_PATCH_DIR, if the directory
+	  <global-patch-dir>/<packagename>/<packageversion>/ exists, then all
+	  *.patch files in this directory will be applied.
+	  Otherwise, if the directory <global-patch-dir>/<packagename> exists,
+	  then all *.patch files in the directory will be applied.
+endmenu
+menu "Build options"
+menu "Commands"
+config BR2_WGET
+	string "Wget command"
+	default "wget --passive-ftp -nd -t 3"
+config BR2_SVN
+	string "Subversion (svn) command"
+	default "svn --non-interactive"
+config BR2_BZR
+	string "Bazaar (bzr) command"
+	default "bzr"
+config BR2_GIT
+	string "Git command"
+	default "git"
+config BR2_CVS
+	string "CVS command"
+	default "cvs"
+config BR2_LOCALFILES
+	string "Local files retrieval command"
+	default "cp"
+config BR2_SCP
+	string "Secure copy (scp) command"
+	default "scp"
+config BR2_HG
+	string "Mercurial (hg) command"
+	default "hg"
+config BR2_ZCAT
+	string "zcat command"
+	default "gzip -d -c"
+	help
+	  Command to be used to extract a gzip'ed file to stdout. zcat
+	  is identical to gunzip -c except that the former may not be
+	  available on your system.
+	  Default is "gzip -d -c"
+	  Other possible values include "gunzip -c" or "zcat".
+config BR2_BZCAT
+	string "bzcat command"
+	default "bzcat"
+	help
+	  Command to be used to extract a bzip2'ed file to stdout.
+	  bzcat is identical to bunzip2 -c except that the former may
+	  not be available on your system.
+	  Default is "bzcat"
+	  Other possible values include "bunzip2 -c" or "bzip2 -d -c".
+config BR2_XZCAT
+	string "xzcat command"
+	default "xzcat"
+	help
+	  Command to be used to extract a xz'ed file to stdout.
+	  Default is "xzcat"
+config BR2_LZCAT
+	string "lzcat command"
+	default "lzip -d -c"
+	help
+	  Command to be used to extract a lzip'ed file to stdout.
+	  Default is "lzip -d -c"
+config BR2_TAR_OPTIONS
+	string "Tar options"
+	default ""
+	help
+	  Options to pass to tar when extracting the sources.
+	  E.g. " -v --exclude='*.svn*'" to exclude all .svn internal
+	  files and to be verbose.
+endmenu
+choice
+	bool "libraries"
+	default BR2_STATIC_LIBS
+	help
+	  Select the type of libraries you want to use on the target.
+	  The default is to build dynamic libraries and use those on the
+	  target filesystem, except when the architecture and/or the
+	  selected binary format does not support shared libraries.
+config BR2_STATIC_LIBS
+	bool "static only"
+	help
+	  Build and use only static libraries. No shared libraries will
+	  be installed on the target. This potentially increases your
+	  code size and should only be used if you know what you are
+	  doing. Note that some packages may not be available when this
+	  option is enabled, due to their need for dynamic library
+	  support.
+endchoice
+endmenu
+menu "Toolchain"
+config BR2_TARGET_CROSS
+	string "target cross compiler"
+config BR2_JLEVEL
+	int "Number of jobs to run simultaneously (0 for auto)"
+	default "0"
+	help
+	  Number of jobs to run simultaneously.  If 0, determine
+	  automatically according to number of CPUs on the host
+	  system.
+config BR2_TARGET_CFLAGS
+	string "target cflags"
+config BR2_TARGET_CXXFLAGS
+	string "target cxxflags"
+config BR2_TARGET_LDFLAGS
+	string "target ldflags"
+endmenu
+menu "System configuration"
+config BR2_EXTERNAL_PRODUCT_NAME
+	string "product name"
+	help
+	  The product name
+menuconfig BR2_EXTERNAL_PRODUCT_VERSION
+	bool "product version"
+	default n
+	help
+	  The product version
+if BR2_EXTERNAL_PRODUCT_VERSION
+config BR2_EXTERNAL_PRODUCT_VERSION_VERSION
+	int "version"
+	default 0
+	range 0 255
+config BR2_EXTERNAL_PRODUCT_VERSION_PATCHLEVEL
+	int "patchlevel"
+	default 0
+	range 0 255
+config BR2_EXTERNAL_PRODUCT_VERSION_SUBLEVEL
+	int "sublevel"
+	default 0
+	range 0 255
+endif
+config BR2_EXTERNAL_BOARD_DDRINIT_FILE
+	string "DDRinit file"
+	help
+	  Path of DDR init file
+config BR2_EXTERNAL_BOOTMEDIA_FILE
+	string "bootmedia file"
+	help
+	  Path of bootmedia file
+
+config BR2_EXTERNAL_HRXKEY
+	string "hrx key file"
+	help
+	  Path of hrx file
+choice
+	prompt "boot type"
+	default BR2_EXTERNAL_BOOT_TYPE_SPINOR
+config BR2_EXTERNAL_BOOT_TYPE_SPINOR
+	bool "spi nor boot"
+config BR2_EXTERNAL_BOOT_TYPE_SPINAND
+	bool "spi nand boot"
+endchoice
+if BR2_EXTERNAL_BOOT_TYPE_SPINAND
+choice
+	prompt "SPINAND pagesize"
+	default CONFIG_MTD_SPINAND_PAGESIZE_2KB
+config CONFIG_MTD_SPINAND_PAGESIZE_2KB
+	bool "2kB"
+config CONFIG_MTD_SPINAND_PAGESIZE_4KB
+	bool "4kB"
+endchoice
+config CONFIG_MTD_SPINAND_PAGESIZE
+	hex
+	default "0x00000800" if CONFIG_MTD_SPINAND_PAGESIZE_2KB
+	default "0x00001000" if CONFIG_MTD_SPINAND_PAGESIZE_4KB
+choice
+	prompt "SPINAND erasesize"
+	default CONFIG_MTD_SPINAND_ERASESIZE_128KB
+config CONFIG_MTD_SPINAND_ERASESIZE_64KB
+	bool "64kB"
+config CONFIG_MTD_SPINAND_ERASESIZE_128KB
+	bool "128kB"
+config CONFIG_MTD_SPINAND_ERASESIZE_256KB
+	bool "256kB"
+endchoice
+config CONFIG_MTD_SPINAND_ERASESIZE
+	hex
+	default "0x00010000" if CONFIG_MTD_SPINAND_ERASESIZE_64KB
+	default "0x00020000" if CONFIG_MTD_SPINAND_ERASESIZE_128KB
+	default "0x00040000" if CONFIG_MTD_SPINAND_ERASESIZE_256KB
+endif
+choice
+       prompt "Firmware compress algo"
+       default BR2_EXTERNAL_FW_COMPRESS_GZIP
+config BR2_EXTERNAL_FW_COMPRESS_GZIP
+       bool "gzip"
+config BR2_EXTERNAL_FW_COMPRESS_LZMA
+       bool "lzma"
+config BR2_EXTERNAL_FW_COMPRESS_LZO1X
+       bool "lzo1x"
+       select BR2_PACKAGE_LIBLZO
+       select BR2_PACKAGE_HOST_LZO1X
+config BR2_EXTERNAL_FW_COMPRESS_NONE
+       bool "none"
+endchoice
+config BR2_EXTERNAL_HCFOTA_FILENAME
+	string "HCFOTA file name"
+	default "HCFOTA.bin"
+	help
+	  The name of HCFOTA binary file
+config BR2_ROOTFS_POST_BUILD_SCRIPT
+	string "Custom scripts to run before creating filesystem images"
+	default ""
+	help
+	  Specify a space-separated list of scripts to be run after the
+	  build has finished and before Buildroot starts packing the
+	  files into selected filesystem images.
+	  This gives users the opportunity to do board-specific
+	  cleanups, add-ons and the like, so the generated files can be
+	  used directly without further processing.
+	  These scripts are called with the target directory name as
+	  first argument. Make sure the exit code of those scripts are
+	  0, otherwise make will stop after calling them.
+config BR2_ROOTFS_POST_IMAGE_SCRIPT
+	string "Custom scripts to run after creating filesystem images"
+	default ""
+	help
+	  Specify a space-separated list of scripts to be run after
+	  the build has finished and after Buildroot has packed the
+	  files into selected filesystem images.
+	  This can for example be used to call a tool building a
+	  firmware image from different images generated by Buildroot,
+	  or automatically extract the tarball root filesystem image
+	  into some location exported by NFS, or any other custom
+	  action.
+	  These scripts are called with the images directory name as
+	  first argument. The script is executed from the main Buildroot
+	  source directory as the current directory.
+config BR2_ROOTFS_POST_SCRIPT_ARGS
+	string "Extra arguments passed to custom scripts"
+	depends on BR2_ROOTFS_POST_IMAGE_SCRIPT != "" \
+		|| BR2_ROOTFS_POST_IMAGE_SCRIPT != ""
+	help
+	  Pass these additional arguments to each post-build or
+	  post-image scripts.
+	  Note that all the post-build and post-image scripts will be
+	  passed the same set of arguments, you can not pass different
+	  arguments to each script.
+	  Note also, as stated in their respective help text, that the
+	  first argument to each post-build or post-image script is the
+	  target directory / images directory. The arguments in this
+	  option will be passed *after* those.
+menuconfig BR2_EXTERNAL_HCPROGRAMMER_SUPPORT
+	bool "hcprogrammer support in pre-boot"
+	default y
+if BR2_EXTERNAL_HCPROGRAMMER_SUPPORT
+config BR2_EXTERNAL_HCPROGRAMMER_SUPPORT_USB0
+	bool "hcprogrammer support USB0"
+	default y
+config BR2_EXTERNAL_HCPROGRAMMER_SUPPORT_USB1
+	bool "hcprogrammer support USB1"
+	default y
+config BR2_EXTERNAL_HCPROGRAMMER_USB_IRQ_DETECT_TIMEOUT
+	int "USB irq detect timeout (milliseconds)"
+	depends on (BR2_EXTERNAL_HCPROGRAMMER_SUPPORT_USB0 || BR2_EXTERNAL_HCPROGRAMMER_SUPPORT_USB1)
+	default 300
+config BR2_EXTERNAL_HCPROGRAMMER_USB_SYNC_DETECT_TIMEOUT
+	int "USB sync detect timeout (milliseconds)"
+	depends on (BR2_EXTERNAL_HCPROGRAMMER_SUPPORT_USB0 || BR2_EXTERNAL_HCPROGRAMMER_SUPPORT_USB1)
+	default 1000
+config BR2_EXTERNAL_HCPROGRAMMER_SUPPORT_WINUSB
+	bool "hcprogrammer support WINUSB"
+	depends on (BR2_EXTERNAL_HCPROGRAMMER_SUPPORT_USB0 || BR2_EXTERNAL_HCPROGRAMMER_SUPPORT_USB1)
+	default n
+endif
+if BR2_FIRMWARE_OVERLAY || BR2_FIRMWARE_DYNLOAD
+	choice
+	       prompt "Firmware overlay/dynamic loading compress algo"
+	       default BR2_FIRMWARE_DYNLOAD_COMPRESS_GZIP
+	config BR2_FIRMWARE_DYNLOAD_COMPRESS_GZIP
+	       bool "gzip"
+	       select CONFIG_LIB_GZIP
+	config BR2_FIRMWARE_DYNLOAD_COMPRESS_LZMA
+	       bool "lzma"
+	       select CONFIG_LIB_LZMA
+	config BR2_FIRMWARE_DYNLOAD_COMPRESS_LZO1X
+	       bool "lzo1x"
+	       select BR2_PACKAGE_LIBLZO
+	       select BR2_PACKAGE_HOST_LZO1X
+
+	config BR2_FIRMWARE_DYNLOAD_COMPRESS_NONE
+	       bool "none"
+
+	endchoice
+	choice
+	       prompt "Firmware overlay/dynamic image store partition"
+	       default BR2_FIRMWARE_DYNLOAD_PARTITION1
+	config BR2_FIRMWARE_DYNLOAD_PARTITION1
+	       bool "fs-partition1-root"
+	config BR2_FIRMWARE_DYNLOAD_PARTITION2
+	       bool "fs-partition2-root"
+	config BR2_FIRMWARE_DYNLOAD_PARTITION3
+	       bool "fs-partition3-root"
+	endchoice
+endif
+menuconfig BR2_FIRMWARE_OVERLAY
+	bool "Enable firmware overlay"
+	default n
+if BR2_FIRMWARE_OVERLAY
+	menuconfig BR2_FIRMWARE_OVERLAY_AUDIO
+	bool "Enable audio decoder overlay"
+	default n
+	if BR2_FIRMWARE_OVERLAY_AUDIO
+		config BR2_FIRMWARE_OVERLAY_MP3DEC
+			bool "Enable overlay for MP3 decoder"
+			depends on BR2_PACKAGE_PREBUILTS_MP3DEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_DCADEC
+			bool "Enable overlay for DCA decoder"
+			depends on BR2_PACKAGE_PREBUILTS_DCADEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_DCAPARSER
+			bool "Enable overlay for DCA parser"
+			depends on BR2_PACKAGE_PREBUILTS_DCAPARSER
+			default y
+		config BR2_FIRMWARE_OVERLAY_AACDEC
+			bool "Enable overlay for AAC decoder"
+			depends on BR2_PACKAGE_PREBUILTS_AACDEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_AACELDEC
+			bool "Enable overlay for AAC-EL decoder"
+			depends on BR2_PACKAGE_PREBUILTS_AACELDEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_AC3DEC
+			bool "Enable overlay for AC3 decoder"
+			depends on BR2_PACKAGE_PREBUILTS_AC3DEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_EAC3DEC
+			bool "Enable overlay for EAC3 decoder"
+			depends on BR2_PACKAGE_PREBUILTS_EAC3DEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_PCMDEC
+			bool "Enable overlay for PCM decoder"
+			depends on BR2_PACKAGE_PREBUILTS_PCMDEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_FLACDEC
+			bool "Enable overlay for FLAC decoder"
+			depends on BR2_PACKAGE_PREBUILTS_FLACDEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_VORBISDEC
+			bool "Enable overlay for VORBIS decoder"
+			depends on BR2_PACKAGE_PREBUILTS_VORBISDEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_WMADEC
+			bool "Enable overlay for WMA decoder"
+			depends on BR2_PACKAGE_PREBUILTS_WMADEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_WMAPRODEC
+			bool "Enable overlay for WMAPRO decoder"
+			depends on BR2_PACKAGE_PREBUILTS_WMAPRODEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_OPUSDEC
+			bool "Enable overlay for OPUS decoder"
+			depends on BR2_PACKAGE_PREBUILTS_OPUSDEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_RADEC
+			bool "Enable overlay for RA decoder"
+			depends on BR2_PACKAGE_PREBUILTS_RADEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_APEDEC
+			bool "Enable overlay for APE decoder"
+			depends on BR2_PACKAGE_PREBUILTS_APEDEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_AMRDEC
+			bool "Enable overlay for AMR decoder"
+			depends on BR2_PACKAGE_PREBUILTS_AMRDEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_PCMDVDDEC
+			bool "Enable overlay for PCMDVD decoder"
+			depends on BR2_PACKAGE_PREBUILTS_PCMDVDDEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_ALACDEC
+			bool "Enable overlay for ALAC decoder"
+			depends on BR2_PACKAGE_PREBUILTS_ALACDEC
+			default y
+	endif
+	menuconfig BR2_FIRMWARE_OVERLAY_VIDEO
+	bool "Enable video decoder overlay"
+	default n
+	if BR2_FIRMWARE_OVERLAY_VIDEO
+		config BR2_FIRMWARE_OVERLAY_MPEG2DEC
+			bool "Enable overlay for MPEG2 decoder"
+			depends on BR2_PACKAGE_PREBUILTS_MPEG2DEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_IMAGEDEC
+			bool "Enable overlay for IMAGE decoder"
+			depends on BR2_PACKAGE_PREBUILTS_IMAGEDEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_H264DEC
+			bool "Enable overlay for H264 decoder"
+			depends on BR2_PACKAGE_PREBUILTS_H264DEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_RVDEC
+			bool "Enable overlay for RV decoder"
+			depends on BR2_PACKAGE_PREBUILTS_RVDEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_VC1DEC
+			bool "Enable overlay for VC1 decoder"
+			depends on BR2_PACKAGE_PREBUILTS_VC1DEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_VP8DEC
+			bool "Enable overlay for VP8 decoder"
+			depends on BR2_PACKAGE_PREBUILTS_VP8DEC
+			default y
+		config BR2_FIRMWARE_OVERLAY_MPEG4DEC
+			bool "Enable overlay for MPEG4 decoder"
+			depends on BR2_PACKAGE_PREBUILTS_MPEG4DEC
+			default y
+	endif
+
+	menuconfig BR2_FIRMWARE_OVERLAY_WIFI
+	bool "Enable Wifi driver overlay"
+	default n
+	if BR2_FIRMWARE_OVERLAY_WIFI
+		config BR2_FIRMWARE_OVERLAY_RTL8188FU
+			bool "Enable overlay for rtl8188fu"
+			depends on BR2_PACKAGE_PREBUILTS_RTL8188FU
+			default y
+		config BR2_FIRMWARE_OVERLAY_RTL8188EU
+			bool "Enable overlay for rtl8188eu"
+			depends on BR2_PACKAGE_PREBUILTS_RTL8188EU
+			default y
+		config BR2_FIRMWARE_OVERLAY_RTL8723AS
+			bool "Enable overlay for rtl8723as"
+			depends on BR2_PACKAGE_PREBUILTS_RTL8723AS
+			default y
+		config BR2_FIRMWARE_OVERLAY_RTL8723BS
+			bool "Enable overlay for rtl8723bs"
+			depends on BR2_PACKAGE_PREBUILTS_RTL8723BS
+			default y
+		config BR2_FIRMWARE_OVERLAY_RTL8733BU
+			bool "Enable overlay for rtl8733bu"
+			depends on BR2_PACKAGE_PREBUILTS_RTL8733BU
+			default y
+		config BR2_FIRMWARE_OVERLAY_RTL8811CU
+			bool "Enable overlay for rtl8811cu"
+			depends on BR2_PACKAGE_PREBUILTS_RTL8811CU
+			default y
+		config BR2_FIRMWARE_OVERLAY_RTL8822CS
+			bool "Enable overlay for rtl8822cs"
+			depends on BR2_PACKAGE_PREBUILTS_RTL8822CS
+			default y
+		config BR2_FIRMWARE_OVERLAY_RTL8733BS
+			bool "Enable overlay for rtl8733bs"
+			depends on BR2_PACKAGE_PREBUILTS_RTL8733BS
+			default y
+	endif
+endif
+menuconfig BR2_FIRMWARE_DYNLOAD
+	bool "Enable firmware dynamic loading"
+	default n
+if BR2_FIRMWARE_DYNLOAD
+	config BR2_FIRMWARE_DYNLOAD_MEDIAPLAYER
+		bool "Enable dynamic loading for mediaplayer"
+		depends on BR2_PACKAGE_PREBUILTS_FFPLAYER
+		default y
+endif
+endmenu
+source "components/Kconfig"

@@ -1,0 +1,27 @@
+config CONFIG_DVP_RN6752V1
+	bool "RN6752V1"
+	default n
+	
+config CONFIG_DVP_RN6752
+	bool "RN6752"
+	default n	
+
+config CONFIG_DVP_BF3A03
+	bool "bf3a03"
+	default n
+
+config CONFIG_DVP_GC0328
+	bool "gc0328"
+	default n
+	
+config CONFIG_DVP_MS7200
+	bool "ms7200"
+	default n
+
+config CONFIG_DVP_TP2804
+	bool "tp2804"
+	default n
+	
+config CONFIG_DVP_GC0308
+	bool "gc0308"
+	default n

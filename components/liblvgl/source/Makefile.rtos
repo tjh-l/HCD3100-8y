@@ -1,0 +1,113 @@
+#
+# Makefile
+#
+AR       = $(TARGET_CROSS)ar
+AS       = $(TARGET_CROSS)as
+CC       = $(TARGET_CROSS)gcc
+CPP      = $(TARGET_CROSS)cpp
+CXX      = $(TARGET_CROSS)g++
+FC       = $(TARGET_CROSS)gfortran
+LD       = $(TARGET_CROSS)ld
+NM       = $(TARGET_CROSS)nm
+RANLIB   = $(TARGET_CROSS)ranlib
+READELF  = $(TARGET_CROSS)readelf
+OBJCOPY  = $(TARGET_CROSS)objcopy
+OBJDUMP  = $(TARGET_CROSS)objdump
+STRIP    = $(TARGET_CROSS)strip
+INSTALL = install
+
+LVGL_DIR_NAME ?= lvgl
+LVGL_DIR ?= ${shell pwd}
+
+SYS_DIR = -I$(LVGL_DIR) \
+		-I$(STAGING_DIR)/usr/include \
+		-I$(STAGING_DIR)/usr/include/hcuapi \
+		-I$(STAGING_DIR)/../include \
+		-I$(PREBUILT_DIR)/usr/include
+
+SYS_DIR += -I$(LVGL_DIR)/lvgl \
+	   -I$(LVGL_DIR)/hc-porting/
+
+LVGL_CONF=include/generated/autoconf.h
+
+CFLAGS += $(TARGET_CFLAGS) $(cflags-y) -D__HCRTOS__=1 -O3 $(SYS_DIR)/  -Wall -Wshadow -Wmissing-prototypes -Wno-discarded-qualifiers -Wall -Wextra -Wno-unused-function -Wno-error=strict-prototypes -Wpointer-arith -fno-strict-aliasing -Wno-error=cpp -Wuninitialized -Wmaybe-uninitialized -Wno-unused-parameter -Wno-missing-field-initializers -Wtype-limits -Wsizeof-pointer-memaccess -Wno-format-nonliteral -Wno-cast-qual -Wunreachable-code -Wno-switch-default -Wreturn-type -Wmultichar -Wformat-security -Wno-ignored-qualifiers -Wno-error=pedantic -Wno-sign-compare -Wno-error=missing-prototypes -Wdouble-promotion -Wclobbered -Wdeprecated -Wempty-body -Wtype-limits -Wshift-negative-value -Wstack-usage=2048 -Wno-unused-value -Wno-unused-parameter -Wno-missing-field-initializers -Wuninitialized -Wmaybe-uninitialized -Wall -Wextra -Wno-unused-parameter -Wno-missing-field-initializers -Wtype-limits -Wsizeof-pointer-memaccess -Wno-format-nonliteral -Wpointer-arith -Wno-cast-qual -Wmissing-prototypes -Wunreachable-code -Wno-switch-default -Wreturn-type -Wmultichar -Wno-discarded-qualifiers -Wformat-security -Wno-ignored-qualifiers -Wno-sign-compare -Wno-error=format=
+
+CFLAGS +=  -DLV_CONF_SKIP=1 -DLV_CONF_KCONFIG_EXTERNAL_INCLUDE=\"$(LVGL_CONF)\"
+
+LDFLAGS ?= -lm
+BIN = demo
+
+# 
+DEMO_LIBS = -lpthread -lge -Wl,--start-group -lstdc++ $(CAST_LIBS) -Wl,--end-group
+
+#LIBS = -lffplayer -lpthread
+
+TARGET = liblvgl.a
+
+#Collect the files to compile
+MAINSRC = ./main.c
+
+-include include/config/auto.conf
+
+include $(LVGL_DIR)/lvgl/lvgl.mk
+include $(LVGL_DIR)/hc-porting/hc-porting.mk
+include $(LVGL_DIR)/hc_examples/hc_examples.mk
+
+#put it after all .mk files, because it use overide CFLGAS,
+include $(LVGL_DIR)/lv_drivers/lv_drivers.mk
+
+OBJEXT ?= .o
+
+AOBJS = $(ASRCS:.S=$(OBJEXT))
+COBJS = $(CSRCS:.c=$(OBJEXT))
+
+MAINOBJ = $(MAINSRC:.c=$(OBJEXT))
+
+## MAINOBJ -> OBJFILES
+
+all_depends := $(patsubst %.c,%.d,$(CSRCS))
+all_depends += $(patsubst %.S,%.d,$(ASRCS))
+
+all: $(TARGET)
+
+ifeq ($(CONFIG_LV_HC_DEMO_APP),y)
+all_depends +=$(patsubst %.c,%.d,$(MAINSRC))
+COBJS += $(MAINOBJ)
+endif
+
+$(TARGET): $(COBJS)
+	-rm -rf $@
+	@$(AR) -rc $@  $(COBJS)
+
+ifeq ($(MENUCONFIG),)
+-include $(all_depends)
+
+%.d: %.c
+	@set -e;rm -rf $@;echo -n "$(dir $@)" >$@.$$$$;$(CC) $(CFLAGS) -MM $^ >> $@.$$$$;cp $@.$$$$ $@;rm -rf $@.$$$$
+endif
+
+%.o: %.c
+	@$(CC) $(CFLAGS) -c $< -o $@
+	@echo "Compiling $@"
+
+%.o: %.cpp
+	@$(CC) $(CFLAGS) -c $< -o $@
+	@echo "Compiling $@"
+
+clean: 
+	rm -f $(BIN) $(TARGET) $(AOBJS) $(COBJS) $(MAINOBJ)
+	rm $(all_depends)
+
+install:
+	@echo "install ......"
+	$(INSTALL)  -m 0755 -d $(STAGING_DIR)/usr/include/lvgl
+	$(INSTALL)  -m 0755 -d $(TARGET_DIR)/usr/lib/
+	$(INSTALL) -D -m 777 $(TARGET) $(STAGING_DIR)/usr/lib/$(TARGET)
+	@cp -rf *.h $(STAGING_DIR)/usr/include/lvgl
+	@rsync -ar --include="*/" --include="*.h" --exclude=*   lvgl $(STAGING_DIR)/usr/include/lvgl
+	@rsync -ar --include="*/" --include="*.h" --exclude=*   lv_drivers $(STAGING_DIR)/usr/include/lvgl
+	@rsync -ar --include="*/" --include="*.h" --exclude=*   include $(STAGING_DIR)/usr/include/lvgl
+	@rsync -ar --include="*/" --include="*.h" --exclude=*   hc-porting $(STAGING_DIR)/usr/include/lvgl
+
+
+-include Makefile.conf

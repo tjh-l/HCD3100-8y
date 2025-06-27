@@ -1,0 +1,13 @@
+config BR2_PACKAGE_LIBSSP
+	bool "Stack Smashing Protector(ssp)"
+	default n
+	help
+	  When enabled "-fstack-protector -fstack-protector-all"
+	  in cflags, some packages need a definition to
+	  __stack_chk_guard and __stack_chk_fail() to pass the
+	  API available when doing configure.
+	  But the firmware will finally link the real definition of
+	  __stack_chk_guard and __stack_chk_fail() in libc.
+	  The build framework just using the configuration option of
+	  BR2_PACKAGE_LIBSSP to automatically append "-fstack-protector
+	   -fstack-protector-all" into the cflags

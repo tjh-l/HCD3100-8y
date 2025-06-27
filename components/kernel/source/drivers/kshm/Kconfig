@@ -1,0 +1,19 @@
+choice  
+	prompt "kshm data storage mode"
+	default CONFIG_KSHM_STATIC_RING_BUFFER_MODE
+
+	config CONFIG_KSHM_STATIC_RING_BUFFER_MODE
+	bool "static ring buffer mode"
+	---help---
+		kshm write/read data to/from a static ring buffer
+
+	config CONFIG_KSHM_DYNAMIC_BUFFER_LIST_MODE
+	bool "dynamic buffer list mode"
+	depends on !CONFIG_DRV_KSHM_FOR_DUALCORE
+	---help---
+		kshm write/read data to/from a dynamic buffer list
+endchoice
+
+config CONFIG_DRV_KSHM_FOR_DUALCORE
+	bool "kshm for dualcore"
+	default n

@@ -1,0 +1,3 @@
+config CONFIG_HC_TK_JG9151S3A
+	bool "jg9151s3a touch key"
+	default n

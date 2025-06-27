@@ -1,0 +1,69 @@
+menuconfig CONFIG_MINIBOOT_SELFCOMPRESSED
+	bool "Support Miniboot self compressed"
+	default n
+
+if CONFIG_MINIBOOT_SELFCOMPRESSED
+
+choice
+	prompt "Miniboot self compress algo"
+	default CONFIG_MINIBOOT_SELFCOMPRESSED_LZMA
+
+	config CONFIG_MINIBOOT_SELFCOMPRESSED_LZMA
+		bool "Miniboot lzma self-compressed"
+
+	config CONFIG_MINIBOOT_SELFCOMPRESSED_LZO1X
+		bool "Miniboot lzo1x self-compressed"
+
+	config CONFIG_MINIBOOT_SELFCOMPRESSED_GZIP
+		bool "Bootloader gzip self-compressed"
+endchoice
+
+endif
+
+choice
+	prompt "Firmware Solution"
+	default CONFIG_MINIBOOT_HCRTOS
+
+	config CONFIG_MINIBOOT_HCRTOS
+		bool "Boot hcrtos firmware"
+
+	config CONFIG_MINIBOOT_HCLINUX_SINGLECORE
+		bool "Boot hclinux single-core firmware"
+
+	config CONFIG_MINIBOOT_NONE
+		bool "No firmware to boot"
+endchoice
+
+config CONFIG_MINIBOOT_SHOWMEMINFO
+	bool "Support show memory info"
+	default y
+	help
+	  Show memory info in console
+
+config CONFIG_MINIBOOT_CUSTOM_DTS_PATH
+	string "Device Tree Source file paths"
+	help
+	  Space-separated list of paths to device tree source files
+	  that will be used to generated dtb file.
+
+config CONFIG_MINIBOOT_DEFAULT_DEVICE_TREE
+	string "Default Device Tree"
+	help
+	  The generated DTB filename that will be installed into
+	  $(IMAGES_DIR). The kernel will include it from $(IMAGES_DIR)
+	  as embedded data if CONFIG_OF_EMBED is enabled.
+
+config CONFIG_MINIBOOT_LIB_LZMA
+	bool "LZMA decompress support"
+	default n
+
+config CONFIG_MINIBOOT_LIB_GZIP
+	bool "GZIP decompress support"
+	select BR2_PACKAGE_ZLIB
+	default n
+
+config CONFIG_MINIBOOT_DISABLE_LOG
+	bool "Disable log"
+	default n
+	help
+	  Disable log in miniboot

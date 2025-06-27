@@ -1,0 +1,261 @@
+menuconfig CONFIG_BOOT_SELFCOMPRESSED
+	bool "Support bootloader self compressed"
+	default n
+
+if CONFIG_BOOT_SELFCOMPRESSED
+
+choice
+	prompt "Bootloader self compress algo"
+	default CONFIG_BOOT_SELFCOMPRESSED_LZMA
+
+	config CONFIG_BOOT_SELFCOMPRESSED_LZMA
+		bool "Bootloader lzma self-compressed"
+
+	config CONFIG_BOOT_SELFCOMPRESSED_LZO1X
+		bool "Bootloader lzo1x self-compressed"
+
+	config CONFIG_BOOT_SELFCOMPRESSED_GZIP
+		bool "Bootloader gzip self-compressed"
+endchoice
+
+endif
+
+config CONFIG_BOOT_KEYSTONE
+	bool "Support boot keystone"
+	depends on CONFIG_SOC_HC16XX
+	select CONFIG_KSC_SUPPORT
+	help
+	  Bootloader support keystone
+
+config CONFIG_BOOT_SHOWLOGO
+	bool "Support boot show logo/av"
+	default y
+	help
+	  This feature depends on audio/video driver support in hcrtos kernel.
+	  If the is no audio/video driver enabled, the audio or video or both
+	  will be ignored.
+
+config CONFIG_BOOT_OSDLOGO
+	bool "Support boot show bmp logo on OSD"
+	default n
+	help
+	  This feature depends on audio/video driver support in hcrtos kernel.
+	  If the is no audio/video driver enabled, the audio or video or both
+	  will be ignored.
+
+config CONFIG_BOOT_ZOOM
+	bool "Support boot logo zoom"
+	default n
+
+config CONFIG_BOOT_HDMI_TX_CHECK_EDID
+	bool "Support edid detection"
+	default n
+	help
+	  edid detection
+
+choice
+	prompt "Firmware Solution"
+	default CONFIG_BOOT_HCRTOS
+
+	config CONFIG_BOOT_HCRTOS
+		bool "Boot hcrtos firmware"
+
+	config CONFIG_BOOT_HCLINUX_DUALCORE
+		bool "Boot hclinux dual-core firmware"
+
+	config CONFIG_BOOT_HCLINUX_SINGLECORE
+		bool "Boot hclinux single-core firmware"
+
+	config CONFIG_BOOT_HCRTOS_OR_HCRTOS
+		bool "Boot hcrtos(Primary) or hcrtos(Secondary) firmware"
+
+	config CONFIG_BOOT_HCRTOS_OR_HCLINUX_DUALCORE
+		bool "Boot hcrtos(Primary) or hclinux dual core(Secondary) firmware"
+
+	config CONFIG_BOOT_HCLINUX_DUALCORE_OR_HCRTOS
+		bool "Boot hclinux dual core(Primary) or hcrtos(Secondary) firmware"
+
+	config CONFIG_BOOT_HCLINUX_DUALCORE_OR_HCLINUX_DUALCORE
+		bool "Boot hclinux dual core(Primary) or hclinux(Secondary) firmware"
+
+	config CONFIG_BOOT_NONE
+		bool "No firmware to boot"
+endchoice
+
+config CONFIG_BOOT_UPDATE_SCREEN_PARAMS
+	bool "Support boot update screen parameters"
+	default n
+	depends on CONFIG_BOOT_HCLINUX_DUALCORE || CONFIG_BOOT_HCRTOS_OR_HCLINUX_DUALCORE || CONFIG_BOOT_HCLINUX_DUALCORE_OR_HCRTOS || CONFIG_BOOT_HCLINUX_DUALCORE_OR_HCLINUX_DUALCORE
+	help
+	  Support boot update screen parameters in bootloader
+
+config CONFIG_BOOT_SHOWMEMINFO
+	bool "Support show memory info"
+	default y
+	help
+	  Show memory info in console
+
+menuconfig CONFIG_BOOT_UPGRADE
+	bool "Support upgrade"
+	select BR2_PACKAGE_HCFOTA
+	default y
+	help
+	  Support upgrade in bootloader
+
+if CONFIG_BOOT_UPGRADE
+config CONFIG_BOOT_AUTO_UPGRADE
+	bool "use auto upgrade in bootloader(usb disk / sd-card)"
+	default n
+
+config CONFIG_BOOT_UPGRADE_SUPPORT_USBDEVICE
+	bool "Support upgrade via USB device mode"
+	select CONFIG_DRVR_RAMDISK
+	select BR2_PACKAGE_PREBUILTS_USBGADGETDRIVER
+	default n
+
+config CONFIG_BOOT_UPGRADE_SUPPORT_USBHOST
+	bool "Support upgrade from U-Disk"
+	default n
+
+if CONFIG_BOOT_UPGRADE_SUPPORT_USBHOST
+config CONFIG_BOOT_UPGRADE_SUPPORT_USBHOST_DETECT_TIMEOUT
+	int "USB Host Timeout to detect U-Disk"
+	range 0 60000
+	default 1000
+endif
+
+config CONFIG_BOOT_UPGRADE_SUPPORT_SD
+	bool "Support upgrade from SD-Card"
+	default n
+
+config CONFIG_BOOT_UPGRADE_SUPPORT_NETWORK
+	bool "Support upgrade from network"
+	default n
+
+config CONFIG_BOOT_UPGRADE_SHOW_WITH_SCREEN
+	bool "Show upgrade progress on screen"
+	select CONFIG_MMAP
+	select CONFIG_DRV_VIDEO
+	select CONFIG_DRV_HCFB
+	default n
+
+config CONFIG_BOOT_UPGRADE_SHOW_WITH_SERIAL
+	bool "Show upgrade progress on serial stdio"
+	default y
+
+config CONFIG_BOOT_UPGRADE_SHOW_WITH_LED
+	bool "Show upgrade progress with LED blinking"
+	default n
+endif
+
+config CONFIG_BOOT_HCFOTA_TIMEOUT
+	int "Timeout to detect HCFOTA.bin in U-Disk/SD"
+	depends on CONFIG_BOOT_UPGRADE_SUPPORT_USBHOST || CONFIG_BOOT_UPGRADE_SUPPORT_SD
+	range 0 60000
+	default 10000
+
+config CONFIG_BOOT_USBD_UPGRADE_REQUEST_TIME
+	int "usbd upgrade request time "
+	depends on CONFIG_BOOT_UPGRADE_SUPPORT_USBDEVICE
+	range 0 5
+	default 3
+
+config CONFIG_BOOT_USBD_UPGRADE_USBD_PORT_NUM
+	int "select which port to usbd upgrade"
+	depends on CONFIG_BOOT_UPGRADE_SUPPORT_USBDEVICE
+	range 0 1
+	default 0
+
+menuconfig CONFIG_BOOT_STANDBY
+	bool "Support boot standby"
+	default n
+	select CONFIG_DRV_INPUT
+	select CONFIG_DRV_STANDBY
+	help
+	  This function depends on the standby function in the hcrtos kernel.
+	  If the standby function is not enabled, the function cannot take effect.
+
+if CONFIG_BOOT_STANDBY
+config CONFIG_BOOT_STANDBY_DELAY_TIME
+	int "Delay before entering standby, in milliseconds"
+	range 0 10000
+	default 0
+endif
+
+menuconfig CONFIG_BOOT_BACKLIGHT
+	bool "Support boot open lcd backlight"
+	default y
+	select BR2_PACKAGE_HUDI
+	select BR2_PACKAGE_HUDI_SCREEN
+	help
+		open lcd backlight
+
+if CONFIG_BOOT_BACKLIGHT
+config CONFIG_BOOT_BACKLIGHT_DELAY_TIME
+	int "Time for boot to turn on backlight, in milliseconds"
+	range 0 10000
+	default 0
+
+config CONFIG_BOOT_PWM_BACKLIGHT_MONITOR
+	bool "Backlight monitor function"
+	default n
+	help
+	  add backlight detection function
+
+config CONFIG_BOOT_BLUETOOTH_BACKLIGHT
+	bool "Bluetooth open gpio backlight"
+	default n
+	help
+	  Set bluetooth open gpio backlight
+
+config CONFIG_BOOT_SYSDATA_SET_BACKLIGHT_VALUE
+	bool "backlight set sysdata lcd_pwm backlight"
+	default n
+	help
+	  Set sysdata lcd_pwm_backlight value
+endif
+
+config CONFIG_BOOT_PQ_START
+	bool "Support boot open pq start"
+	default n
+	depends on CONFIG_SOC_HC16XX
+	help
+	  open pq start
+
+menuconfig CONFIG_BOOT_LCD
+	bool "Support boot open lcd"
+	default y
+	help
+	  Open lcddev for lcddev initialization
+
+if CONFIG_BOOT_LCD
+config CONFIG_BOOT_LCD_ROTATE
+	bool "Support lcd rotate"
+	default n
+	select CONFIG_DRV_LCD
+	select CONFIG_DRV_LCD_DEV
+	help
+		open lcd rotate
+endif
+
+config CONFIG_BOOT_SUPPORT_POPUP
+	bool "Support popup while waiting for USB/SD-card"
+	default n
+
+menuconfig CONFIG_BOOT_SUPPORT_BATTERY_CHECK
+	bool "Support battery level check"
+	default n
+	help
+		Battery level detection, does not start when the battery level is low
+
+if CONFIG_BOOT_SUPPORT_BATTERY_CHECK
+choice
+	prompt "Battery Partnumber"
+	default CONFIG_BOOT_SUPPORT_BATTERY_CHECK_C6P2
+
+config CONFIG_BOOT_SUPPORT_BATTERY_CHECK_C6P2
+	bool "Cubemp5 c6 p2"
+	help
+		Supprot cubemp5 c6 p2 battery check
+endchoice
+endif

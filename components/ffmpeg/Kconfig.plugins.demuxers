@@ -1,0 +1,308 @@
+menuconfig BR2_PACKAGE_FFMPEG_PLUGINS_DEMUXERS
+	bool "ffmpeg demuxer plugins"
+	default y
+
+if BR2_PACKAGE_FFMPEG_PLUGINS_DEMUXERS
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_RTSP
+	bool "rtsp demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_HLS
+	bool "hls demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_DTS
+	bool "dts demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_MOV
+	bool "mov demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_M4V
+	bool "m4v demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_ASF
+	bool "asf demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_AVI
+	bool "avi demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_FLV
+	bool "flv demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_MKV
+	bool "matroska demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_MPEGPS
+	bool "mpegps demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_MPEGTS
+	bool "mpegts demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_RM
+	bool "rm demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_OGG
+	bool "ogg demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_SWF
+	bool "swf demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_DV
+	bool "dv demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_NUV
+	bool "nuv demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_GXF
+	bool "gxf demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_MXF
+	bool "mxf demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_NUT
+	bool "nut demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_MP3
+	bool "mp3 demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_AA
+	bool "aa demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_ACT
+	bool "act demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_AIFF
+	bool "aiff demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_WAV
+	bool "wav demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_APE
+	bool "ape demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_AAC
+	bool "aac demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_FLAC
+	bool "flac demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_AC3
+	bool "ac3 demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_EAC3
+	bool "eac3 demuxer"
+	default n	
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_AMR
+	bool "amr demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_AU
+	bool "au demuxer"
+	default n	
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_CAF
+	bool "caf demuxer"
+	default n	
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_GSM
+	bool "gsm demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_AVR
+	bool "avr demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_IRCAM
+	bool "ircam demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_MLP
+	bool "mlp demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_MTV
+	bool "mtv demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_NISTSPHERE
+	bool "nistsphere demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_PVF
+	bool "pvf demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_MPC
+	bool "mpc demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_RSO
+	bool "rso demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_VOC
+	bool "voc demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_EPAF
+	bool "epaf demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_QCP
+	bool "qcp demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_TAK
+	bool "tak demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_W64
+	bool "w64 demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_WV
+	bool "wv demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_TTA
+	bool "tta demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_PCM
+	bool "pcm demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_DSF
+	bool "dsf demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_H264
+	bool "h264 demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_MPEGVIDEO
+	bool "mpegvideo demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_VC1
+	bool "vc1 demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_IMAGE2
+	bool "image demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_PNG
+	bool "png demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_JPG
+	bool "jpg demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_GIF
+	bool "gif demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_BMP
+	bool "bmp demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_TIFF
+	bool "tiff demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_WEBP
+	bool "webp demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_ASS
+	bool "ass/ssa demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_VOBSUB
+	bool "vobsub demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_MICRODVD
+	bool "microdvd demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_SAMI
+	bool "smi/sami demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_MPL2
+	bool "mpl2 demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_SRT
+	bool "srt demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_WEBVTT
+	bool "webvtt demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_LRC
+	bool "lrc demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_DVBSUB
+	bool "dvbsub demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_STL
+	bool "stl demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_SUBVIEWER1
+	bool "subviewer1 demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_PJS
+	bool "pjs demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_VPLAYER
+	bool "vplayer demuxer"
+	default n
+
+config BR2_PACKAGE_FFMPEG_DEMUXER_TRUEHD
+	bool "truehd demuxer"
+	default n
+	
+config BR2_PACKAGE_FFMPEG_DEMUXER_ICO
+	bool "ico demuxer"
+	default n
+
+endif
+

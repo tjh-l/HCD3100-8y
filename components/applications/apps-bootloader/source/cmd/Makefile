@@ -1,0 +1,12 @@
+cmd-y := bootm.o mtdload.o
+cmd-$(CONFIG_BOOT_SHOWLOGO) += showlogo.o
+cmd-$(CONFIG_BOOT_OSDLOGO) += osdlogo.o
+cmd-$(CONFIG_BOOT_SHOWMEMINFO) += meminfo.o
+cmd-$(CONFIG_BOOT_UPGRADE) += upgrade.o upgrade_progress.o
+cmd-$(CONFIG_BOOT_UPGRADE_SUPPORT_USBDEVICE) += usbd_upgrade.o
+cmd-$(CONFIG_BOOT_STANDBY) += standby.o
+cmd-$(CONFIG_BOOT_BACKLIGHT) += backlight.o
+cmd-$(CONFIG_BOOT_PQ_START) += pq_start.o
+cmd-$(CONFIG_BOOT_LCD) += boot_lcd.o
+cmd-$(CONFIG_BOOT_SUPPORT_BATTERY_CHECK) += battery.o
+obj-y += cmd.o

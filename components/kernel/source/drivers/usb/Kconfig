@@ -1,0 +1,27 @@
+config CONFIG_USB_PHY_SETTING
+    bool "enable USB PHY setting"
+    default n
+
+config CONFIG_USB_GADGET_VBUS_DETECT
+    bool "detect usb#0 gadget connect/disconnect by VBUS"
+    default n
+    ---help---
+        The hardware development board needs to be connected to
+        the VBUS pin, then you can determine whether there is a
+        USB host connection by detecting the VBUS status value.
+
+menuconfig CONFIG_USB_GADGET_VENDOR
+    bool "USB gadget vendor support"
+    default n
+
+    if CONFIG_USB_GADGET_VENDOR
+        config CONFIG_USB_ZERO
+            bool "usb gadget demo: zero"
+            default n
+
+        config CONFIG_USB_GADGET_WINUSB_VENDOR
+            bool "usb gadget demo: winusb(WCID) vendor parameters"
+            default n
+
+
+    endif

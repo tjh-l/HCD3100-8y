@@ -1,0 +1,17 @@
+mkyaffs2image
+mkyaffsimage
+yaffs_ecc.c
+yaffs_ecc.h
+yaffs_endian.h
+yaffs_guts.h
+yaffs_hweight.c
+yaffs_hweight.h
+yaffs_list.h
+yaffs_osglue.h
+yaffs_packedtags2.c
+yaffs_packedtags2.h
+yaffs_trace.h
+yaffscfg.h
+yaffsfs.h
+ydirectenv.h
+yportenv.h

@@ -1,0 +1,15 @@
+menuconfig CONFIG_SENSOR
+	bool "sensor"
+	default n
+
+if CONFIG_SENSOR
+	source "sensor/Kconfig"
+endif
+
+menuconfig CONFIG_TOUCHKEY
+	bool "touchkey"
+	default n
+
+if CONFIG_TOUCHKEY
+	source "tk/Kconfig"
+endif

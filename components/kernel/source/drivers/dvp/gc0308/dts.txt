@@ -1,0 +1,69 @@
+
+	i2c@0{
+		pinmux-active = <PINPAD_L28 3 PINPAD_L29 3>;
+		devpath = "/dev/i2c0";
+		baudrate = <100000>;
+		mode = "master";
+		status = "okay";
+	};
+	
+	dvp-gc0308 {
+		i2c-devpath = "/dev/i2c0";
+		i2c-addr = <0x21>; //7bit addr
+		reset-gpio = <PINPAD_B00 GPIO_ACTIVE_LOW>;
+		power-gpio = <PINPAD_B02 GPIO_ACTIVE_LOW>;
+		status = "okay";
+	};
+	
+	vindvp {
+		devpath = "/dev/vindvp";
+		dvp-devpath = "/dev/dvp-gc0308";
+		/*
+		0:SAV_EAV mode
+		1:DE mode
+		2:HSYNC VSYNC mode
+		*/
+		dvp-mode = <1>;
+		h-total-len = <800>;
+		v-total-len = <500>;
+		h-active-len = <640>;
+		v-active-len = <480>;
+		h-front-len = <120>;
+		h-sync-len = <8>;
+		h-back-len = <32>;
+		v-front-len = <2>;
+		v-sync-len = <8>;
+		v-back-len = <10>;
+		/* bool type, 0 or 1*/
+		h-sync-level = <1>;
+		/* bool type, 0 or 1*/
+		v-sync-level = <1>;
+		pinmux-dvp = <PINPAD_L16 PINMUX_L16_VIN_D0 
+					  PINPAD_L17 PINMUX_L17_VIN_D1
+					  PINPAD_L18 PINMUX_L18_VIN_D2 
+					  PINPAD_L19 PINMUX_L19_VIN_D3
+					  PINPAD_L20 PINMUX_L20_VIN_D4
+					  PINPAD_L21 PINMUX_L21_VIN_D5
+					  PINPAD_L23 PINMUX_L23_VIN_D6 
+					  PINPAD_L24 PINMUX_L24_VIN_D7 
+					  PINPAD_L25 PINMUX_L25_VIN_CLK
+					  PINPAD_L26 PINMUX_L26_VIN_HSYNC
+					  PINPAD_L27 PINMUX_L27_VIN_VSYNC>;
+		
+		/*
+		TVSYS_INVALID = 0,
+		TVSYS_480I = 1,
+		TVSYS_480P = 2 ,
+		TVSYS_576I = 3,
+		TVSYS_576P = 4,
+		TVSYS_720P_50 = 5,
+		TVSYS_720P_60 = 6,
+		TVSYS_1080I_25 = 7,
+		TVSYS_1080I_30 = 8,
+		TVSYS_1080P_24 = 9,
+		TVSYS_1080P_25 = 10,
+		TVSYS_1080P_30 = 11,
+		*/
+		//tvsys = <10>; 
+		status = "okay";
+	}; 

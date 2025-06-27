@@ -1,0 +1,3 @@
+obj-$(CONFIG_GSENSOR_SC7A20) += sc7a20/
+obj-$(CONFIG_GSENSOR_QMA6100P) += qma6100p/
+obj-$(CONFIG_GSENSOR_STK8BAXX) += stk8baxx/

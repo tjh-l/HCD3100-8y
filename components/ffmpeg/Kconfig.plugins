@@ -1,0 +1,10 @@
+menuconfig BR2_PACKAGE_FFMPEG_PLUGINS
+	bool "ffmpeg plugins"
+	default y
+
+if BR2_PACKAGE_FFMPEG_PLUGINS
+source "Kconfig.plugins.protocols"
+source "Kconfig.plugins.demuxers"
+source "Kconfig.plugins.parsers"
+source "Kconfig.plugins.decoders"
+endif

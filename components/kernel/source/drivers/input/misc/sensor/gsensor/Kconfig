@@ -1,0 +1,11 @@
+config CONFIG_GSENSOR_SC7A20
+	bool "sc7a20h gsensor"
+	default n
+
+config CONFIG_GSENSOR_QMA6100P
+	bool "qma6100p gsensor"
+	default n
+
+config CONFIG_GSENSOR_STK8BAXX
+	bool "stk8baxx gsensor "
+	default n

@@ -1,0 +1,22 @@
+{
+  "index": {
+    "menus": {
+      "wlan": true,
+      "setting": true,
+      "filemanager": false,
+      "language": true,
+      "upgrade": true,
+      "upgrade_local": true,
+      "restart": true,
+      "reset": true
+    }
+  },
+  "wlan": {
+    "safeties": {
+      "NONE" : "NONE",
+      "WEP_OPEN": "WEP",
+      "WPA2PSK_AES": "WPA/WPA2",
+      "WPA2PSK_SAE": "WPA3"
+    }
+  }
+}
