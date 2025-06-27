@@ -333,7 +333,7 @@ void set_keystone(int top_w, int bottom_w)
         vhance.info.enable = 0;
         ioctl(m_fd_dis , DIS_SET_KEYSTONE_PARAM , &vhance);
         keystone_fb_viewport_scale();   
-        lv_refr_now(lv_disp_get_default()); 
+        //lv_refr_now(lv_disp_get_default()); 
 
         //DE set keystone, take effect at once.
         vhance.info.enable = 1;
