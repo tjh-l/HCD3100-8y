@@ -410,7 +410,8 @@ static uint32_t key_preproc(uint32_t act_key)
             change_screen(SCREEN_BA);
         } 
         else if(KEY_F4 == act_key){
-
+    
+            console_run_cmd("enejtag");
         } 
         else if(KEY_F5 == act_key){
             bluetooth_channel_slect_support(0x01);
