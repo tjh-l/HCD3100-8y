@@ -173,6 +173,16 @@ void change_screen(enum SCREEN_TYPE stype)
 
     cur_scr = stype;
     switch (stype) {
+#ifdef SUPPORT_STARTUP_PAGE_LANGUAGE
+    case SCREEN_STARTUP:
+#endif
+#ifdef ADD_PROJECTION_PAGE
+    case SCREEN_PROJECTION:
+#endif
+#ifdef ADD_SURPRISE_PAGE
+    case SCREEN_SUPPORT:
+    case SCREEN_SUB_SUPPORT:
+#endif
     case SCREEN_CHANNEL:
     case SCREEN_SETUP:
     case SCREEN_CHANNEL_MAIN_PAGE:
@@ -1219,6 +1229,20 @@ static void ui_screen_init(void)
     battery_screen_init();
 #endif
 
+#ifdef SUPPORT_STARTUP_PAGE_LANGUAGE
+	if(!startup_scr)
+		startup_screen_init();
+#endif
+#ifdef ADD_PROJECTION_PAGE
+	if(!projection_scr)
+		projection_screen_init();
+#endif
+#ifdef ADD_SURPRISE_PAGE
+	if(!support_scr)
+		support_screen_init();
+	if(!sub_support_scr)
+		sub_support_screen_init();
+#endif
 }
 
 //init some UI/LVGL system.
@@ -1367,6 +1391,11 @@ int main(int argc, char *argv[])
     cur_screen_set(SCREEN_CHANNEL, SCREEN_CHANNEL);
 
     cur_chan = (SCREEN_TYPE_E)projector_get_some_sys_param(P_CUR_CHANNEL); 
+#ifdef SUPPORT_STARTUP_PAGE_LANGUAGE
+    if(projector_get_some_sys_param(P_SYS_IS_STARTUP))
+        change_screen(SCREEN_STARTUP);
+    else
+#endif
     change_screen(cur_chan);
 
 #ifdef HDMIIN_SUPPORT    
@@ -1651,6 +1680,13 @@ int main(int argc, char *argv[])
                      
                 break;
         #endif
+#ifdef SUPPORT_STARTUP_PAGE_LANGUAGE
+            case SCREEN_STARTUP:
+				if(!startup_scr)
+					startup_screen_init();
+                _ui_screen_change(startup_scr, 0, 0);
+                break;
+#endif
             default:
                 break;
             }

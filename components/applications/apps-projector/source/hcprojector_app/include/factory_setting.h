@@ -132,6 +132,9 @@ typedef enum {
     P_ATK_CALIBRATION,
 	#endif
 #endif
+#ifdef SUPPORT_STARTUP_PAGE_LANGUAGE
+    P_SYS_IS_STARTUP,
+#endif
 } projector_sys_param;
 
 
@@ -370,7 +373,9 @@ typedef struct appdata{
 #ifdef SYS_ZOOM_SUPPORT
     sys_scale_setting_t scale_setting;
 #endif
-
+#ifdef SUPPORT_STARTUP_PAGE_LANGUAGE
+    bool is_startup;
+#endif
 #ifdef HC_FACTORY_TEST
     factory_settiing_t factory_setting;
 #endif

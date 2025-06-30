@@ -61,6 +61,9 @@ typedef enum SCREEN_TYPE{
 #ifdef AIRP2P_SUPPORT
         SCREEN_AIRP2P,
 #endif
+#ifdef SUPPORT_STARTUP_PAGE_LANGUAGE
+	SCREEN_STARTUP,
+#endif
 }SCREEN_TYPE_E;
 extern SCREEN_TYPE_E last_scr;
 extern SCREEN_TYPE_E prev_scr;
@@ -97,6 +100,16 @@ extern lv_obj_t *ui_airp2p_cast_root;
 extern void ui_cast_airp2p_init(void);
 #endif
 
+#ifdef SUPPORT_STARTUP_PAGE_LANGUAGE
+	extern lv_obj_t* startup_scr;
+#endif
+#ifdef ADD_PROJECTION_PAGE
+	extern lv_obj_t* projection_scr;
+#endif
+#ifdef ADD_SURPRISE_PAGE
+	extern lv_obj_t* support_scr;
+	extern lv_obj_t* sub_support_scr;
+#endif
 #ifdef USBMIRROR_SUPPORT	
 extern lv_obj_t *ui_um_play;
 extern lv_obj_t *ui_um_upgrade;
@@ -160,6 +173,16 @@ void hdmi_rx_set_flip_mode(int rotate_type , int mirror_type);
 void cvbs_rx_set_flip_mode(int rotate_type , int mirror_type);
 //int is_epg_code();
 
+#ifdef SUPPORT_STARTUP_PAGE_LANGUAGE
+	extern void startup_screen_init(void);
+#endif
+#ifdef ADD_PROJECTION_PAGE
+	extern void projection_screen_init(void);
+#endif
+#ifdef ADD_SURPRISE_PAGE
+	extern void support_screen_init(void);
+	extern void sub_support_screen_init(void);
+#endif
 extern void channel_screen_init(void);
 extern void setup_screen_init(void);
 extern void hdmi_screen_init(void);

@@ -381,5 +381,8 @@
 #define STR_HC               378
 #define STR_HCC_LABEL        379
 #define STR_HCC_LABEL4       380
+#define STR_CHOOSE_LANG1     381
+#define STR_CHOOSE_LANG2     382
+#define STR_CHOOSE_LANG3     383
 
 #endif//_STRING_ID_

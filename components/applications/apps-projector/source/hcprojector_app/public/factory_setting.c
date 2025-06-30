@@ -117,7 +117,9 @@ void projector_factory_init(void)
 	sys_param.app_data.soundset.balance = 0;
 	sys_param.app_data.soundset.bt_setting = BLUETOOTH_OFF;
 
-	
+#ifdef SUPPORT_STARTUP_PAGE_LANGUAGE
+	sys_param.app_data.is_startup = 1;
+#endif
 	sys_param.app_data.soundset.treble = 0;
 	sys_param.app_data.soundset.bass = 0;
 	int eq_gains[EQ_MODE_MAX][EQ_BAND_LEN] = {
@@ -668,6 +670,11 @@ char* projector_get_version_info(void){
 		 break;
 	#endif
 #endif
+#ifdef SUPPORT_STARTUP_PAGE_LANGUAGE
+		case P_SYS_IS_STARTUP:
+	        return sys_param.app_data.is_startup;
+		 break;	
+#endif
 		default:
 			break;
 	}
@@ -859,6 +866,11 @@ void projector_set_some_sys_param(projector_sys_param param, int v){
              sys_param.app_data.atk_calibration = v;
              break;
 	#endif
+#endif
+#ifdef SUPPORT_STARTUP_PAGE_LANGUAGE
+		case P_SYS_IS_STARTUP:
+	        sys_param.app_data.is_startup = v;
+		 break;		
 #endif
 		default:
 			break;

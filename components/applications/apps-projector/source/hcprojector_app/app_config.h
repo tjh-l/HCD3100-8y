@@ -20,6 +20,7 @@ app_config.h: the global config header file for application
 #define ADD_SELECT_BLUE_RECEIVE_FOR_SOURCE
 #define SUPPORT_BLUE_RECEIVE
 #define SUPPORT_BT_RECEIVE_MODE
+#define SUPPORT_STARTUP_PAGE_LANGUAGE
 
 
 
