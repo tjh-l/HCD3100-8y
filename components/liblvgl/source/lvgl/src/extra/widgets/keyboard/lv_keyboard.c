@@ -45,7 +45,7 @@ const lv_obj_class_t lv_keyboard_class = {
     .editable = 1,
     .base_class = &lv_btnmatrix_class
 };
-
+#if 0   // cst new keyboard1
 static const char * const default_kb_map_lc[] = {"1#", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", LV_SYMBOL_BACKSPACE, "\n",
                                                  "ABC", "a", "s", "d", "f", "g", "h", "j", "k", "l", LV_SYMBOL_NEW_LINE, "\n",
                                                  "_", "-", "z", "x", "c", "v", "b", "n", "m", ".", ",", ":", "\n",
@@ -58,7 +58,21 @@ static const lv_btnmatrix_ctrl_t default_kb_ctrl_lc_map[] = {
     LV_BTNMATRIX_CTRL_CHECKED | LV_KB_BTN(1), LV_BTNMATRIX_CTRL_CHECKED | LV_KB_BTN(1), LV_KB_BTN(1), LV_KB_BTN(1), LV_KB_BTN(1), LV_KB_BTN(1), LV_KB_BTN(1), LV_KB_BTN(1), LV_KB_BTN(1), LV_BTNMATRIX_CTRL_CHECKED | LV_KB_BTN(1), LV_BTNMATRIX_CTRL_CHECKED | LV_KB_BTN(1), LV_BTNMATRIX_CTRL_CHECKED | LV_KB_BTN(1),
     LV_KEYBOARD_CTRL_BTN_FLAGS | 2, LV_BTNMATRIX_CTRL_CHECKED | 2, 6, LV_BTNMATRIX_CTRL_CHECKED | 2, LV_KEYBOARD_CTRL_BTN_FLAGS | 2
 };
+#else
+static const char * const user_mode_kb_map_lc[] = {"1", "2", "3"," ", "a", "b", "c", "d", "e", "f", "g", "ABC", LV_SYMBOL_KEYBOARD, "\n",
+                                                 "4", "5", "6"," ", "h", "i", "j", "k", "l", "m", "n","123_!", LV_SYMBOL_BACKSPACE, "\n",
+                                                 "7", "8", "9"," ", "o", "p", "q", "r", "s", "t", "u", "clear", LV_SYMBOL_NEW_LINE, "\n",
+                                                 ".com","0","@"," ","v","w","x","y","z","*",".","space",LV_SYMBOL_OK, "\n", ""
+                                                };
 
+static const lv_btnmatrix_ctrl_t user_mode_kb_map_lc_map[] = {
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4),LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+};
+#endif
+#if 0   // cst new keyboard2
 static const char * const default_kb_map_uc[] = {"1#", "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", LV_SYMBOL_BACKSPACE, "\n",
                                                  "abc", "A", "S", "D", "F", "G", "H", "J", "K", "L", LV_SYMBOL_NEW_LINE, "\n",
                                                  "_", "-", "Z", "X", "C", "V", "B", "N", "M", ".", ",", ":", "\n",
@@ -72,6 +86,21 @@ static const lv_btnmatrix_ctrl_t default_kb_ctrl_uc_map[] = {
     LV_KEYBOARD_CTRL_BTN_FLAGS | 2, LV_BTNMATRIX_CTRL_CHECKED | 2, 6, LV_BTNMATRIX_CTRL_CHECKED | 2, LV_KEYBOARD_CTRL_BTN_FLAGS | 2
 };
 
+#else
+static const char * const default_kb_map_uc[] = {"1", "2", "3"," ","A", "B", "C", "D", "E", "F", "G", "abc", LV_SYMBOL_KEYBOARD, "\n",
+                                                 "4", "5", "6"," ", "H", "I", "J", "K", "L", "M", "N","123_!", LV_SYMBOL_BACKSPACE, "\n",
+                                                 "7", "8", "9"," ", "O", "P", "Q", "R", "S", "T", "U", "clear", LV_SYMBOL_NEW_LINE, "\n",
+                                                 ".com","0","@"," ","V","W","X","Y","Z","*",".","space",LV_SYMBOL_OK, "\n", ""
+                                                };
+
+static const lv_btnmatrix_ctrl_t default_kb_ctrl_uc_map[] = {
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4),LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+};
+#endif
+#if 0   // cst new keyboard3
 static const char * const default_kb_map_spec[] = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "0", LV_SYMBOL_BACKSPACE, "\n",
                                                    "abc", "+", "-", "/", "*", "=", "%", "!", "?", "#", "<", ">", "\n",
                                                    "\\",  "@", "$", "(", ")", "{", "}", "[", "]", ";", "\"", "'", "\n",
@@ -85,6 +114,20 @@ static const lv_btnmatrix_ctrl_t default_kb_ctrl_spec_map[] = {
     LV_KEYBOARD_CTRL_BTN_FLAGS | 2, LV_BTNMATRIX_CTRL_CHECKED | 2, 6, LV_BTNMATRIX_CTRL_CHECKED | 2, LV_KEYBOARD_CTRL_BTN_FLAGS | 2
 };
 
+#else
+static const char * const default_kb_map_spec[] = {"1", "2", "3"," ","a", "b", "c", "d", "e", "f", "g", "ABC", LV_SYMBOL_KEYBOARD, "\n",
+                                                 "4", "5", "6"," ", "h", "i", "j", "k", "l", "m", "n","123_!", LV_SYMBOL_BACKSPACE, "\n",
+                                                 "7", "8", "9"," ", "o", "p", "q", "r", "s", "t", "u", "clear", LV_SYMBOL_NEW_LINE, "\n",
+                                                 ".com","0","@"," ","v","e","x","y","z","*",".","space",LV_SYMBOL_OK, "\n", ""
+                                                };
+static const lv_btnmatrix_ctrl_t default_kb_ctrl_spec_map[] = {
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4),LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+};
+#endif
+#if 0   // cst new keyboard4
 static const char * const default_kb_map_num[] = {"1", "2", "3", LV_SYMBOL_KEYBOARD, "\n",
                                                   "4", "5", "6", LV_SYMBOL_OK, "\n",
                                                   "7", "8", "9", LV_SYMBOL_BACKSPACE, "\n",
@@ -97,8 +140,23 @@ static const lv_btnmatrix_ctrl_t default_kb_ctrl_num_map[] = {
     1, 1, 1, 2,
     1, 1, 1, 1, 1
 };
+#else
+// cst  ==========start==========
+static const char * const default_kb_map_num[] = {"1", "2", "3","_", "!", "?", "#", "$", "%", "^", "&", "ABC", LV_SYMBOL_KEYBOARD, "\n",
+                                                 "4", "5", "6",".", "(", ")", "-", "+", "=", "{", "}","abc", LV_SYMBOL_BACKSPACE, "\n",
+                                                 "7", "8", "9","~", "[", "]", "|", "\"", "/", "<", ">", "clear", LV_SYMBOL_NEW_LINE, "\n",
+                                                 ".com","0","@","`",":",";","'","'",",","*",".","space",LV_SYMBOL_OK, "\n", ""
+                                                };
 
+static const lv_btnmatrix_ctrl_t default_kb_ctrl_num_map[] = {
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+    LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4),LV_BTNMATRIX_CTRL_DISABLED | 4,LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KB_BTN(4), LV_KEYBOARD_CTRL_BTN_FLAGS | 6, LV_BTNMATRIX_CTRL_CHECKED | 5,
+};
+#endif
 static const char * * kb_map[9] = {
+#if 0   // cst new keyboard
     (const char * *)default_kb_map_lc,
     (const char * *)default_kb_map_uc,
     (const char * *)default_kb_map_spec,
@@ -108,8 +166,20 @@ static const char * * kb_map[9] = {
     (const char * *)default_kb_map_lc,
     (const char * *)default_kb_map_lc,
     (const char * *)NULL,
+#else
+    (const char * *)user_mode_kb_map_lc,
+    (const char * *)default_kb_map_uc,  // ´óÐ´
+    (const char * *)default_kb_map_spec,   // Ð¡Ð´
+    (const char * *)default_kb_map_num,     // Êý×Ö
+    (const char * *)user_mode_kb_map_lc,    
+    (const char * *)user_mode_kb_map_lc,
+    (const char * *)user_mode_kb_map_lc,
+    (const char * *)user_mode_kb_map_lc,
+    (const char * *)NULL,
+#endif
 };
 static const lv_btnmatrix_ctrl_t * kb_ctrl[9] = {
+#if 0   // cst new keyboard
     default_kb_ctrl_lc_map,
     default_kb_ctrl_uc_map,
     default_kb_ctrl_spec_map,
@@ -119,6 +189,17 @@ static const lv_btnmatrix_ctrl_t * kb_ctrl[9] = {
     default_kb_ctrl_lc_map,
     default_kb_ctrl_lc_map,
     NULL,
+#else
+    user_mode_kb_map_lc_map,
+    default_kb_ctrl_uc_map,
+    default_kb_ctrl_spec_map,
+    default_kb_ctrl_num_map,
+    user_mode_kb_map_lc_map,
+    user_mode_kb_map_lc_map,
+    user_mode_kb_map_lc_map,
+    user_mode_kb_map_lc_map,
+    NULL,
+#endif
 };
 
 /**********************
@@ -300,6 +381,20 @@ void lv_keyboard_def_event_cb(lv_event_t * e)
         lv_keyboard_update_ctrl_map(obj);
         return;
     }
+#if 1   // cst new keyboard
+    else if(strcmp(txt, "123_!") == 0) {
+        keyboard->mode = LV_KEYBOARD_MODE_NUMBER;
+        lv_btnmatrix_set_map(obj, kb_map[LV_KEYBOARD_MODE_NUMBER]);
+        lv_keyboard_update_ctrl_map(obj);
+        return;
+    }else if(strcmp(txt, "space") == 0) {
+        lv_textarea_add_char(keyboard->ta, ' ');
+        return;
+    }else if(strcmp(txt, "clear") == 0) {
+        lv_textarea_set_text(keyboard->ta," ");
+        return;
+    }
+#endif
     else if(strcmp(txt, LV_SYMBOL_CLOSE) == 0 || strcmp(txt, LV_SYMBOL_KEYBOARD) == 0) {
         lv_res_t res = lv_event_send(obj, LV_EVENT_CANCEL, NULL);
         if(res != LV_RES_OK) return;

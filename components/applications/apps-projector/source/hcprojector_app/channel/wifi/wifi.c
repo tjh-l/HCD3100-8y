@@ -2337,6 +2337,7 @@ static void create_wifi_new_pwd_conne_widget(){//修改密码ui
     lv_keyboard_set_textarea(kb, ta);
 }
 
+#if 0
 static lv_obj_t* create_keypad_widget(lv_obj_t* obj, lv_event_cb_t event_cb,int height) {//键盘ui
     kb_g_onoff(true);
     kb = lv_keyboard_create(lv_layer_top());
@@ -2350,12 +2351,13 @@ static lv_obj_t* create_keypad_widget(lv_obj_t* obj, lv_event_cb_t event_cb,int 
 
     lv_keyboard_t *keyb = (lv_keyboard_t *)kb;
     lv_obj_t *btns = (lv_obj_t*)(&keyb->btnm);
-    lv_obj_set_style_bg_opa(btns, LV_OPA_0, LV_PART_ITEMS);
+    lv_obj_set_style_bg_opa(btns, LV_OPA_30, LV_PART_ITEMS);//ZHP
     lv_obj_set_style_bg_color(btns, lv_palette_darken(LV_PALETTE_GREY, 1), LV_PART_ITEMS | LV_STATE_CHECKED);
     lv_obj_set_style_border_width(btns, 1, LV_PART_ITEMS);
     lv_obj_set_style_border_color(btns, lv_color_white(), LV_PART_ITEMS);
     lv_obj_set_style_text_color(btns, lv_color_white(), LV_PART_ITEMS);
     lv_obj_set_style_text_color(btns, lv_color_white(), LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(btns, lv_color_make(255,255,0), LV_PART_ITEMS | LV_STATE_FOCUS_KEY);//ZHP
     lv_obj_set_style_pad_hor(btns, lv_disp_get_hor_res(lv_disp_get_default())/10, 0);
     lv_timer_t* timer_focus_kb = lv_timer_create(focus_kb_timer_handle, 250, kb);//延迟focus到kb对象
     lv_timer_set_repeat_count(timer_focus_kb, 1);
@@ -2363,6 +2365,36 @@ static lv_obj_t* create_keypad_widget(lv_obj_t* obj, lv_event_cb_t event_cb,int 
 
     return kb;   
 }
+#else
+static lv_obj_t* create_keypad_widget(lv_obj_t* obj, lv_event_cb_t event_cb,int height) {//键盘ui
+    kb_g_onoff(true);
+    kb = lv_keyboard_create(lv_layer_top());
+    lv_obj_set_style_text_font(kb, osd_font_get_by_langid(0, FONT_MID), 0);
+    lv_obj_set_style_bg_color(kb,lv_color_hex(0xFFFFFF),LV_PART_MAIN|LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(kb, lv_color_hex(0xFFFFFF),LV_PART_ITEMS | LV_STATE_DEFAULT);
+    lv_obj_set_size(kb,LV_PCT(100),LV_PCT((height <= 0 ? 38 : height)));
+    lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, 0);
+    lv_obj_add_event_cb(kb, event_cb, LV_EVENT_ALL, obj);
+    lv_keyboard_t *keyb = (lv_keyboard_t *)kb;
+    lv_obj_t *btns = (lv_obj_t*)(&keyb->btnm);
+    lv_obj_set_style_bg_opa(btns, LV_OPA_100, LV_PART_ITEMS | LV_STATE_FOCUS_KEY);//ZHP
+    lv_obj_set_style_bg_opa(btns, LV_OPA_0, LV_PART_ITEMS | LV_STATE_DISABLED);//ZHP
+    lv_obj_set_style_bg_color(btns, lv_color_hex(0xFFFFFF), LV_PART_ITEMS | LV_STATE_CHECKED);  // 键盘图标部分颜色
+    lv_obj_set_style_bg_color(btns, lv_color_hex(0xFFFFFF), LV_PART_ITEMS | LV_STATE_DISABLED);  // 键盘图标部分颜色
+    lv_obj_set_style_bg_color(btns, lv_color_hex(0x36AFF4), LV_PART_ITEMS | LV_STATE_FOCUS_KEY);//ZHP 选中的文本颜色
+    lv_obj_set_style_border_width(btns, 1, LV_PART_ITEMS);
+    lv_obj_set_style_border_color(btns, lv_color_white(), LV_PART_ITEMS);
+    lv_obj_set_style_text_color(btns, lv_color_black(), LV_PART_ITEMS);
+    lv_obj_set_style_text_color(btns, lv_color_black(), LV_PART_ITEMS | LV_STATE_CHECKED);
+    lv_obj_set_style_text_color(btns, lv_color_make(255,255,255), LV_PART_ITEMS | LV_STATE_FOCUS_KEY);//ZHP 选中的文本颜色
+    lv_obj_set_style_pad_hor(btns, lv_disp_get_hor_res(lv_disp_get_default())/10, 0);
+    lv_obj_set_style_pad_top(btns,30,0);
+    lv_timer_t* timer_focus_kb = lv_timer_create(focus_kb_timer_handle, 250, kb);//延迟focus到kb对象
+    lv_timer_set_repeat_count(timer_focus_kb, 1);
+    lv_timer_reset(timer_focus_kb);
+    return kb;   
+}
+#endif
 
 void create_wifi_add_hidden_net_widget(){//添加隐藏wifi ui
     lv_obj_set_style_bg_opa(lv_layer_top(), LV_OPA_50, 0);
